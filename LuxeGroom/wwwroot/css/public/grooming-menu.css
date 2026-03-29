@@ -1,0 +1,132 @@
+﻿/*
+ * groomingmenu.css
+ * Styles for the Grooming Menu section of LuxeGroom.
+ * Covers the menu grid, service cards, featured card variant,
+ * badge, pricing rows, and card body layout.
+ * Used by _GroomingMenu.cshtml.
+ */
+
+/* ===== GROOMING MENU ===== */
+
+/* Full-width charcoal section with top and bottom borders */
+.grooming-menu {
+    padding: 128px 0;
+    background: var(--charcoal);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Three-column equal grid for service cards */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+/* ===== MENU CARD ===== */
+
+/* Dark bordered service card with fixed minimum height */
+.menu-card {
+    background: var(--bg-dark);
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 40px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: border-color 0.3s ease;
+    min-height: 420px;
+}
+
+    /* Gold border tint on card hover */
+    .menu-card:hover {
+        border-color: rgba(197,160,89,0.3);
+    }
+
+/* Featured card — gold border, navy background, lifted with shadow */
+.menu-card--featured {
+    border: 1px solid var(--accent-gold);
+    background: var(--primary-navy);
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+}
+
+/* ===== BADGE ===== */
+
+/* Gold pill badge floating above the top border of the featured card */
+.menu-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-gold);
+    color: var(--primary-navy);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    white-space: nowrap;
+}
+
+/* ===== CARD BODY ===== */
+
+/* Flex-grow body area that fills remaining card height */
+.menu-card-body {
+    flex: 1;
+}
+
+/* Serif service name heading */
+.menu-card h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #ffffff;
+}
+
+/* Muted service description text */
+.menu-card p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 32px;
+}
+
+/* ===== PRICING ===== */
+
+/* Vertical list of price rows separated from the description by a top border */
+.menu-prices {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding-top: 24px;
+}
+
+/* Single price row with size label and value side by side */
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Muted uppercase size label on the left */
+.price-size {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+}
+
+/* Gold serif price value on the right */
+.price-value {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    color: var(--accent-gold);
+    font-weight: 500;
+}

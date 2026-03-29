@@ -1,0 +1,429 @@
+﻿/*
+ * cta.css
+ * Styles for the CTA section, Reservation Modal, and Success Overlay.
+ * Used by _Cta.cshtml and _ReservationModal.cshtml.
+ */
+
+/* ===== CTA SECTION ===== */
+
+/* Full-width centered CTA section with dark background */
+.cta-section {
+    padding: 128px 24px;
+    background: var(--bg-dark);
+    display: flex;
+    justify-content: center;
+}
+
+/* Centered bordered box containing the CTA content */
+.cta-box {
+    max-width: 768px;
+    width: 100%;
+    border: 1px solid rgba(197,160,89,0.2);
+    padding: 80px 48px;
+    position: relative;
+    text-align: center;
+}
+
+/* Gold icon floated above the top border of the CTA box */
+.cta-icon {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-dark);
+    padding: 0 32px;
+}
+
+    /* Gold material icon size inside the CTA badge */
+    .cta-icon .material-symbols-outlined {
+        font-size: 40px;
+        color: var(--accent-gold);
+    }
+
+/* Large serif heading inside the CTA box */
+.cta-box h2 {
+    font-family: var(--font-serif);
+    font-size: 40px;
+    font-weight: 500;
+    margin-bottom: 32px;
+}
+
+/* Muted body text inside the CTA box */
+.cta-box p {
+    color: rgba(255,255,255,0.6);
+    font-size: 17px;
+    margin-bottom: 48px;
+    line-height: 1.75;
+}
+
+/* Gold outlined CTA button — works as both button and anchor */
+.btn-outline-gold,
+a.btn-outline-gold {
+    display: inline-block;
+    padding: 20px 48px;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    background: transparent;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+    /* Gold fill with navy text on button hover */
+    .btn-outline-gold:hover,
+    a.btn-outline-gold:hover {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+    }
+
+/* ===== RESERVATION MODAL OVERLAY ===== */
+
+/* Full-screen blurred overlay — hidden by default */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(5, 7, 15, 0.88);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+    /* Show overlay as flex when active class is added */
+    .modal-overlay.modal--active {
+        display: flex;
+    }
+
+/* ===== MODAL PANEL ===== */
+
+/* Centered modal card with gold border and slide-in animation */
+.modal-panel {
+    background: var(--charcoal);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    width: 100%;
+    max-width: 520px;
+    padding: 56px 48px 48px;
+    position: relative;
+    text-align: center;
+    animation: modalSlideIn 0.3s ease;
+}
+
+/* Slide up and fade in animation for the modal panel */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== MODAL TOP ICON ===== */
+
+/* Gold icon floated above the top border of the modal panel */
+.modal-icon {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--charcoal);
+    padding: 0 16px;
+}
+
+    /* Gold bordered icon inside the modal badge */
+    .modal-icon .material-symbols-outlined {
+        font-size: 40px;
+        color: var(--accent-gold);
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        padding: 8px;
+        display: block;
+    }
+
+/* ===== MODAL TITLE ===== */
+
+/* Large serif title at the top of the modal form */
+.modal-title {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+/* ===== MODAL FORM ===== */
+
+/* Left-aligned form content inside the modal */
+.modal-form {
+    text-align: left;
+}
+
+/* Spacing block for each label and input pair */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Small uppercase spaced label above each input */
+.form-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
+}
+
+/* Transparent input with gold border — no background */
+.form-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(197, 160, 89, 0.25);
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 14px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+    /* Gold border on input focus */
+    .form-input:focus {
+        border-color: var(--accent-gold);
+    }
+
+    /* Very dim placeholder text */
+    .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Gold-tinted calendar picker icon for date inputs */
+    .form-input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.5) sepia(1) saturate(3) hue-rotate(5deg);
+        cursor: pointer;
+    }
+
+/* ===== SELECT DROPDOWN ===== */
+
+/* Wrapper for positioning the custom chevron arrow */
+.form-select-wrapper {
+    position: relative;
+}
+
+/* Select inherits form-input with extra right padding for arrow */
+.form-select {
+    cursor: pointer;
+    padding-right: 48px;
+}
+
+    /* Dark background for dropdown options */
+    .form-select option {
+        background: var(--charcoal);
+        color: #ffffff;
+    }
+
+/* Gold chevron arrow pinned to the right of the select */
+.form-select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgba(197, 160, 89, 0.5);
+    pointer-events: none;
+}
+
+/* ===== INPUT ICON WRAPPER ===== */
+
+/* Relative wrapper for inputs with a right-side icon */
+.form-input-icon-wrapper {
+    position: relative;
+}
+
+/* Extra right padding to avoid text overlapping the icon */
+.form-input--icon {
+    padding-right: 48px;
+}
+
+/* Gold icon pinned to the right inside the input */
+.form-input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgba(197, 160, 89, 0.5);
+    pointer-events: none;
+}
+
+/* ===== MODAL ACTIONS ===== */
+
+/* Two-column grid for confirm and cancel buttons */
+.modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+/* Gold gradient confirm button */
+.btn-modal-confirm {
+    padding: 14px;
+    background: linear-gradient(135deg, #C5A059 0%, #E2C48E 50%, #C5A059 100%);
+    color: var(--primary-navy);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+    /* Slightly faded on confirm hover */
+    .btn-modal-confirm:hover {
+        opacity: 0.9;
+    }
+
+    /* Dimmed and non-interactive when disabled */
+    .btn-modal-confirm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* Transparent cancel button with faint white border */
+.btn-modal-cancel {
+    padding: 14px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    /* Brighter border and white text on cancel hover */
+    .btn-modal-cancel:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+    }
+
+/* ===== SUCCESS OVERLAY ===== */
+
+/* Full-screen blurred overlay for success state — hidden by default */
+.success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(5, 7, 15, 0.92);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+    /* Show overlay with fade-in when active class is added */
+    .success-overlay.success--active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+/* Fade in animation for the success overlay */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== SUCCESS PANEL ===== */
+
+/* Centered success card with gold border and slide-in animation */
+.success-panel {
+    background: var(--charcoal);
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    max-width: 480px;
+    width: 100%;
+    padding: 64px 48px 56px;
+    text-align: center;
+    animation: modalSlideIn 0.35s ease;
+}
+
+/* ===== SUCCESS ICON ===== */
+
+/* Gold check icon with bottom spacing */
+.success-icon {
+    margin-bottom: 28px;
+}
+
+    /* Large gold material icon inside the success panel */
+    .success-icon .material-symbols-outlined {
+        font-size: 56px;
+        color: var(--accent-gold);
+    }
+
+/* ===== SUCCESS TITLE ===== */
+
+/* Serif heading inside the success panel */
+.success-title {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 16px;
+}
+
+/* ===== SUCCESS MESSAGE ===== */
+
+/* Muted body message below the success title */
+.success-message {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+/* ===== SUCCESS CLOSE BUTTON ===== */
+
+/* Gold outlined close button at the bottom of the success panel */
+.btn-success-close {
+    display: inline-block;
+    padding: 16px 48px;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    background: transparent;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    /* Gold fill with navy text on close button hover */
+    .btn-success-close:hover {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+    }

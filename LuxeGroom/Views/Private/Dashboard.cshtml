@@ -1,0 +1,110 @@
+﻿@using LuxeGroom.ViewModels
+@model DashboardViewModel
+
+@*
+ * Dashboard.cshtml
+ * Main dashboard page for LuxeGroom.
+ * Displays a welcome message, summary stat cards, and recent appointments.
+ * Now connected to real data via DashboardViewModel.
+ *@
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewBag.Title = "Dashboard";
+}
+
+<!-- Page title with logged-in username -->
+<header class="dashboard-header">
+    <h1 class="welcome-title">
+        Welcome back, <span class="username">@Model.Username</span>!
+    </h1>
+    <p class="welcome-subtitle">
+        Here's what's happening with your grooming business today.
+    </p>
+</header>
+
+<!-- Summary stat cards -->
+<div class="stats-grid">
+
+    <!-- Total appointments today -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #1132d4;">
+            <span>📅</span>
+        </div>
+        <div class="stat-info">
+            <h3 class="stat-value">@Model.AppointmentsToday</h3>
+            <p class="stat-label">Appointments Today</p>
+        </div>
+    </div>
+
+    <!-- Total number of clients -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #C5A059;">
+            <span>👥</span>
+        </div>
+        <div class="stat-info">
+            <h3 class="stat-value">@Model.TotalClients</h3>
+            <p class="stat-label">Total Clients</p>
+        </div>
+    </div>
+
+    <!-- Revenue generated this month (you can swap estimated to real sum later) -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #10b981;">
+            <span>💰</span>
+        </div>
+        <div class="stat-info">
+            <h3 class="stat-value">
+                ₱@Model.EstimatedRevenueThisMonth.ToString("N0")
+            </h3>
+            <p class="stat-label">Estimated Revenue This Month</p>
+        </div>
+    </div>
+
+    <!-- Average customer rating (still placeholder for now) -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: #8b5cf6;">
+            <span>⭐</span>
+        </div>
+        <div class="stat-info">
+            <h3 class="stat-value">4.9</h3>
+            <p class="stat-label">Average Rating</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Recent appointments list -->
+<div class="activity-section">
+    <h2 class="section-title">Recent Appointments</h2>
+    <div class="activity-card">
+
+        @if (Model.RecentAppointments != null && Model.RecentAppointments.Any())
+        {
+            foreach (var a in Model.RecentAppointments)
+            {
+                var dateText = a.ReservationDate.ToString("MMM dd, yyyy • hh:mm tt");
+                string statusClass = a.Status == "Approved"
+                ? "completed"
+                : a.Status == "Pending"
+                ? "pending"
+                : "scheduled";
+
+                <div class="activity-item">
+                    <div class="activity-icon">🐾</div>
+                    <div class="activity-details">
+                        <h4>@a.OwnerName - @a.GroomingStyle</h4>
+                        <p>@dateText</p>
+                    </div>
+                    <span class="status-badge @statusClass">@a.Status</span>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>No recent appointments.</p>
+            </div>
+        }
+
+    </div>
+</div>

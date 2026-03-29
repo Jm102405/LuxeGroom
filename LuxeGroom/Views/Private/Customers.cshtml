@@ -1,0 +1,88 @@
+﻿@*
+ * Customers.cshtml
+ * Customer Management page for LuxeGroom.
+ * Displays customers with their latest pet reservation info.
+ *@
+
+@using LuxeGroom.Models
+@model List<CustomerListItemViewModel>
+
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewBag.Title = "Customers";
+}
+
+<link rel="stylesheet" href="~/css/private/customers.css" />
+
+<header class="dashboard-header">
+    <h1 class="welcome-title">Customer Management</h1>
+    <p class="welcome-subtitle">View and manage your client database and pet profiles.</p>
+</header>
+
+<div class="activity-section">
+
+    <div class="section-header">
+        <h2 class="section-title">
+            Customer List
+            <span class="cust-count">(@Model.Count)</span>
+        </h2>
+    </div>
+
+    <div class="list-scroll-wrapper">
+        <div class="activity-card">
+
+            @if (Model.Count > 0)
+            {
+                foreach (var c in Model)
+                {
+                    <div class="activity-item customer-row">
+                        <div class="activity-icon">👤</div>
+
+                        <div class="activity-details">
+                            <h4>@c.FullName</h4>
+
+                            <p class="cust-meta">
+                                <span>@c.Email</span> •
+                                <span>@c.Phone</span>
+                            </p>
+
+                            <p class="cust-pet">
+                                @if (!string.IsNullOrEmpty(c.PetName))
+                                {
+                                    <span>Pet: <strong>@c.PetName</strong> (@c.GroomingStyle)</span>
+                                }
+                                else
+                                {
+                                    <span>No pet reservation linked yet.</span>
+                                }
+                            </p>
+
+                            @if (c.ReservationDate.HasValue)
+                            {
+                                <p class="cust-date">
+                                    Last schedule:
+                                    @c.ReservationDate.Value.ToString("MMMM dd, yyyy")
+                                </p>
+                            }
+                        </div>
+
+                        <div class="customer-side">
+                            <p class="cust-id">ID: @c.CustomerId</p>
+                            <p class="cust-managedby">Managed by: @c.ManagedBy</p>
+                            <button class="status-badge cust-view-btn">
+                                View Profile
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <p>No customers yet.</p>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

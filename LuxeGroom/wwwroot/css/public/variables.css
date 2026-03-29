@@ -1,0 +1,93 @@
+﻿/*
+ * site.css
+ * Global base styles for the LuxeGroom public landing page.
+ * Covers CSS variables, box model reset, base element styles,
+ * container width, and shared section header utility classes.
+ * Loaded globally via Views/Public/_Layout.cshtml.
+ */
+
+/* ===== VARIABLES ===== */
+
+/* Global design tokens — colors and font families */
+:root {
+    --primary-navy: #0A1128;
+    --accent-gold: #C5A059;
+    --charcoal: #161925;
+    --bg-dark: #0f111a;
+    --font-display: 'Manrope', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+}
+
+/* ===== RESET ===== */
+
+/* Universal box model reset including pseudo-elements */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Smooth scroll, horizontal overflow hidden, auto height */
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+}
+
+/* Dark base body with display font, antialiasing, and min full height */
+body {
+    background-color: var(--bg-dark);
+    font-family: var(--font-display);
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+    height: auto;
+}
+
+/* Strip underline and inherit color from all anchor tags */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Block display and max width cap for all images */
+img {
+    display: block;
+    max-width: 100%;
+}
+
+/* ===== CONTAINER ===== */
+
+/* Centered max-width content wrapper with horizontal padding */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ===== SHARED SECTION HEADER ===== */
+
+/* Reusable centered section header block */
+.section-header {
+    text-align: center;
+    margin-bottom: 96px;
+}
+
+    /* Serif section heading inside the shared header */
+    .section-header h2 {
+        font-family: var(--font-serif);
+        font-size: 40px;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
+
+/* Thick centered gold divider line below the heading */
+.gold-divider {
+    width: 80px;
+    height: 4px;
+    background: var(--accent-gold);
+    margin: 0 auto;
+}

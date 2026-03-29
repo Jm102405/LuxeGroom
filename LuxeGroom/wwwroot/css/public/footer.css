@@ -1,0 +1,125 @@
+﻿/*
+ * footer.css
+ * Styles for the Footer section of LuxeGroom.
+ * Covers the footer grid, brand column, nav link columns,
+ * bottom bar, and social icon links.
+ * Used by _Footer.cshtml.
+ */
+
+/* ===== FOOTER ===== */
+
+/* Charcoal footer with top border and vertical padding */
+.footer {
+    background: var(--charcoal);
+    padding-top: 80px;
+    padding-bottom: 40px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Three-column grid — brand column wider than the two link columns */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 80px;
+}
+
+/* Logo row with gold icon and white brand name */
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    color: var(--accent-gold);
+}
+
+    /* Logo icon size inside the footer */
+    .footer-logo .logo-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* White uppercase brand name beside the logo icon */
+    .footer-logo span {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #ffffff;
+    }
+
+/* Muted brand description text below the logo */
+.footer-brand p {
+    color: rgba(255,255,255,0.4);
+    font-weight: 300;
+    max-width: 320px;
+    line-height: 1.75;
+}
+
+/* Gold uppercase column heading */
+.footer-col h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 24px;
+}
+
+/* Vertical list of footer nav links */
+.footer-col ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+    /* Muted link text in each footer column */
+    .footer-col ul li a {
+        font-size: 14px;
+        color: rgba(255,255,255,0.6);
+        transition: color 0.2s ease;
+    }
+
+        /* Full white on footer link hover */
+        .footer-col ul li a:hover {
+            color: #ffffff;
+        }
+
+/* Bottom bar with copyright and social links, separated by a top border */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 40px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+    /* Very muted small copyright text */
+    .footer-bottom p {
+        font-size: 11px;
+        letter-spacing: 0.15em;
+        color: rgba(255,255,255,0.3);
+    }
+
+/* Horizontal row of social icon links */
+.footer-social {
+    display: flex;
+    gap: 32px;
+}
+
+    /* Muted social icon link */
+    .footer-social a {
+        color: rgba(255,255,255,0.3);
+        transition: color 0.2s ease;
+    }
+
+        /* Gold color on social icon hover */
+        .footer-social a:hover {
+            color: var(--accent-gold);
+        }
+
+    /* Social icon size */
+    .footer-social .material-symbols-outlined {
+        font-size: 20px;
+    }

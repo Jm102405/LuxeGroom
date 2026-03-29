@@ -1,0 +1,14 @@
+# Build outputs
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# Sensitive config — DO NOT PUSH
+appsettings.json
+appsettings.Development.json
+
+# OS files
+.DS_Store
+Thumbs.db

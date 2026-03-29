@@ -1,0 +1,49 @@
+﻿/*
+ * fonts.css
+ * Registers all custom fonts used across LuxeGroom.
+ * Includes Manrope (body text), Playfair Display (headings),
+ * and Material Symbols Outlined (icons).
+ */
+
+/* Manrope variable font used for all body and UI text */
+@import url('fonts.css');
+@font-face {
+    font-family: 'Manrope';
+    src: url('/fonts/Manrope-VariableFont_wght.ttf') format('truetype');
+    font-weight: 200 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Playfair Display variable font used for titles and headings */
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('/fonts/PlayfairDisplay-VariableFont_wght.ttf') format('truetype');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Material Symbols icon font used for UI icons throughout the app */
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    src: url('/fonts/MaterialSymbolsOutlined.woff2') format('woff2');
+    font-weight: 100 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Base class for rendering Material Symbols icons as inline elements */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+}

@@ -1,0 +1,137 @@
+﻿@*
+ * _Layout.cshtml
+ * Shared layout for all private (authenticated) pages in LuxeGroom.
+ * Includes the sidebar navigation, logo, role-based menu visibility,
+ * logout confirmation, and the main content render area.
+ * Updated in Thread3.2: Merged Report links into a single collapsible Reports dropdown.
+ * Updated in Thread3.2: Moved Reports dropdown CSS to dashboard.css.
+ * Updated in Thread3.2: Added Revenue, Grooming Style, Payment, Monthly Summary report nav links.
+ *@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Luxe Groom</title>
+    <link rel="icon" type="image/png" href="~/images/browsericon.png" />
+    <link rel="stylesheet" href="~/css/fonts.css" />
+    <link rel="stylesheet" href="~/css/private/dashboard.css" />
+    <link rel="stylesheet" href="~/css/private/reservation.css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="#1132d4"></path>
+                    </svg>
+                </div>
+                <h2 class="logo-text">LUXE GROOM</h2>
+            </div>
+
+            <nav class="nav-menu">
+
+                <a href="/Dashboard/Dashboard"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                    Dashboard
+                </a>
+
+                <a href="/Reservation/Reservations"
+                   class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reservation" ? "active" : "")">
+                    Reservation
+                </a>
+
+                <a href="/Customers/Customers"
+                   class="nav-item @(
+                   ViewContext.RouteData.Values["controller"]?.ToString() == "Customers" &&
+                   ViewContext.RouteData.Values["action"]?.ToString() == "Customers"
+                       ? "active" : "")">
+                    Customers
+                </a>
+
+                @* Users — Admin only *@
+                @if (ViewBag.Role == "Admin")
+                {
+                    <a href="/User/Users"
+                       class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
+                        Users
+                    </a>
+                }
+
+                @* Reports dropdown — Admin only *@
+                @if (ViewBag.Role == "Admin")
+                {
+                    var isReportsActive = ViewContext.RouteData.Values["controller"]?.ToString() == "Reports";
+
+                    <div class="nav-dropdown @(isReportsActive ? "open" : "")" id="reportsDropdown">
+                        <div class="nav-dropdown-toggle @(isReportsActive ? "active" : "")"
+                             onclick="toggleDropdown('reportsDropdown')">
+                            <span>Reports</span>
+                            <span class="dropdown-arrow">▾</span>
+                        </div>
+                        <div class="nav-sub-menu">
+                            <a href="/Reports/ReservationReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "ReservationReport" ? "active" : "")">
+                                Reservation Reports
+                            </a>
+                            <a href="/Reports/CustomerReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "CustomerReport" ? "active" : "")">
+                                Customer Reports
+                            </a>
+                            <a href="/Reports/RevenueReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "RevenueReport" ? "active" : "")">
+                                Revenue Report
+                            </a>
+                            <a href="/Reports/GroomingStyleReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "GroomingStyleReport" ? "active" : "")">
+                                Grooming Style Report
+                            </a>
+                            <a href="/Reports/PaymentReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "PaymentReport" ? "active" : "")">
+                                Payment Report
+                            </a>
+                            <a href="/Reports/MonthlySummaryReport"
+                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MonthlySummaryReport" ? "active" : "")">
+                                Monthly Summary Report
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                <a href="/Settings/Settings"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
+                    Settings
+                </a>
+
+            </nav>
+
+            <div class="logout-section">
+                <button class="logout-btn" onclick="confirmLogout()">
+                    <img src="~/images/logout.png" alt="Logout" />
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                location.href = '/Login/Logout';
+            }
+        }
+
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+            dropdown.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

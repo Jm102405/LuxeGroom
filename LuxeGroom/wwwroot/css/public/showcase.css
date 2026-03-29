@@ -1,0 +1,193 @@
+﻿/*
+ * showcase.css
+ * Styles for the Service Showcase section of LuxeGroom.
+ * Covers the showcase header, group headers, grid layout variants
+ * (portrait, landscape, square), showcase items, and image hover effects.
+ * Used by _ServiceShowcase.cshtml.
+ */
+
+/* ===== SERVICE SHOWCASE ===== */
+
+/* Full-width navy showcase section with vertical padding */
+.showcase {
+    padding: 128px 0;
+    background: var(--primary-navy);
+}
+
+/* ===== SHOWCASE HEADER ===== */
+
+/* Centered header block above the showcase groups */
+.showcase-header {
+    text-align: center;
+    margin-bottom: 96px;
+}
+
+/* Small gold uppercase eyebrow label above the heading */
+.showcase-eyebrow {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 16px;
+}
+
+/* Fluid serif section heading */
+.showcase-header h2 {
+    font-family: var(--font-serif);
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 500;
+    margin-bottom: 32px;
+}
+
+/* Thin centered gold divider line below the heading */
+.showcase-divider {
+    width: 96px;
+    height: 1px;
+    background: rgba(197, 160, 89, 0.4);
+    margin: 0 auto;
+}
+
+/* ===== SHOWCASE GROUP ===== */
+
+/* Spacing between each service group */
+.showcase-group {
+    margin-bottom: 96px;
+}
+
+    /* Remove bottom margin from the last group */
+    .showcase-group:last-child {
+        margin-bottom: 0;
+    }
+
+/* Group header row with title and extending line */
+.showcase-group-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+    /* Serif group title — no wrap */
+    .showcase-group-header h3 {
+        font-family: var(--font-serif);
+        font-size: 28px;
+        font-weight: 400;
+        white-space: nowrap;
+        color: #ffffff;
+    }
+
+        /* Italic style for emphasized words in the group title */
+        .showcase-group-header h3 em {
+            font-style: italic;
+        }
+
+/* Faint horizontal line that fills remaining width beside the title */
+.showcase-group-line {
+    flex-grow: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ===== SHOWCASE GRID BASE ===== */
+
+/* Base grid with gap shared by all layout variants */
+.showcase-grid {
+    display: grid;
+    gap: 24px;
+}
+
+/* ===== PORTRAIT — 4:5, 3 columns ===== */
+
+/* Three-column grid for portrait ratio items */
+.showcase-grid--portrait {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+    /* 4:5 aspect ratio via padding-top trick */
+    .showcase-grid--portrait .showcase-item {
+        padding-top: 125%; /* 4:5 ratio */
+    }
+
+/* ===== LANDSCAPE — 16:9, 2 columns ===== */
+
+/* Two-column grid for landscape ratio items */
+.showcase-grid--landscape {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+    /* 16:9 aspect ratio via padding-top trick */
+    .showcase-grid--landscape .showcase-item {
+        padding-top: 56.25%; /* 16:9 ratio */
+    }
+
+/* ===== SQUARE — 1:1, 3 columns ===== */
+
+/* Three-column grid for square ratio items */
+.showcase-grid--square {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+    /* 1:1 aspect ratio via padding-top trick */
+    .showcase-grid--square .showcase-item {
+        padding-top: 100%; /* 1:1 ratio */
+    }
+
+/* ===== SHOWCASE ITEM ===== */
+
+/* Overflow-hidden item container that fills the padding-top box */
+.showcase-item {
+    position: relative;
+    overflow: hidden;
+    background: #0a0c14;
+    display: block;
+    width: 100%;
+}
+
+/* Optional gold border variant for showcase items */
+.showcase-item--bordered {
+    border: 1px solid rgba(197, 160, 89, 0.1);
+}
+
+/* ===== IMAGE fills the padding-top box ===== */
+
+/* Absolute image that fills the aspect ratio box — grayscale by default */
+.showcase-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%);
+    transition: filter 0.7s ease, transform 0.7s ease;
+}
+
+/* Color reveal and zoom on item hover */
+.showcase-item:hover img {
+    filter: grayscale(0%);
+    transform: scale(1.08);
+}
+
+/* ===== OVERLAY for Full Groom ===== */
+
+/* Semi-transparent navy overlay on top of the image */
+.showcase-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 17, 40, 0.4);
+    transition: background 0.5s ease;
+    pointer-events: none;
+}
+
+/* Fade overlay to transparent on item hover */
+.showcase-item:hover .showcase-overlay {
+    background: transparent;
+}
+
+/* Explicit overlay background for the Full Groom variant */
+.showcase-item--overlay .showcase-overlay {
+    background: rgba(10, 17, 40, 0.4);
+}

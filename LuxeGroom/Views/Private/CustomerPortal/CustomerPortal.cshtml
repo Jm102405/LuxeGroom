@@ -1,0 +1,108 @@
+﻿@using System
+
+@*
+ * CustomerPortal.cshtml
+ * Customer private page for LuxeGroom (pure UI only).
+ * Shows 50% down payment upload section and grooming history section.
+ * No backend logic yet — all data is static/dummy text.
+ *@
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewBag.Title = "Customer Portal";
+}
+
+<link rel="stylesheet" href="~/css/private/customer-portal.css" />
+
+<header class="dashboard-header">
+    <h1 class="welcome-title">
+        Welcome, <span class="username">Jane Doe</span>!
+    </h1>
+    <p class="welcome-subtitle">
+        View your grooming history and upload your 50% down payment receipt.
+    </p>
+</header>
+
+<div class="customer-portal-grid">
+    <!-- 50% Down Payment Card -->
+    <section class="portal-card">
+        <h2 class="section-title">50% Down Payment</h2>
+        <p class="portal-text">
+            Reservation for <span class="highlight-text">Full Grooming Package</span> on
+            <span class="highlight-text">Mar 25, 2026 • 02:30 PM</span>.
+        </p>
+        <p class="portal-text">
+            Please upload a clear photo or screenshot of your 50% down payment receipt and include your reference number.
+        </p>
+
+        <form class="payment-form">
+            <div class="form-group">
+                <label for="receiptImage">Upload Receipt Image (JPG/PNG)</label>
+                <input type="file" id="receiptImage" name="receiptImage" accept="image/*" />
+                <span class="field-hint">Maximum size: 5 MB. Make sure details are readable.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="referenceNumber">Reference Number</label>
+                <input type="text" id="referenceNumber" name="referenceNumber" placeholder="e.g. GCash Ref No." />
+            </div>
+
+            <button type="button" class="btn-primary">Submit Payment Proof</button>
+
+            <p class="portal-note">
+                Note: This is a preview UI only. Your payment will be reviewed by our staff once this feature is fully enabled.
+            </p>
+        </form>
+
+        <div class="existing-receipt">
+            <p class="portal-text">
+                Latest uploaded receipt:
+            </p>
+            <div class="receipt-preview-wrapper">
+                <img src="~/images/sample-receipt.png" alt="Uploaded receipt" class="receipt-preview" />
+            </div>
+            <p class="portal-text small-text">
+                Reference: <span class="highlight-text">GCASH-0123-456-789</span> • Status:
+                <span class="status-badge pending">Pending Verification</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Grooming History Card -->
+    <section class="portal-card">
+        <h2 class="section-title">Grooming History</h2>
+
+        <div class="history-table">
+            <div class="history-header">
+                <span>Date</span>
+                <span>Service</span>
+                <span>Status</span>
+                <span>Paid</span>
+            </div>
+
+            <div class="history-row">
+                <span>Mar 05, 2026</span>
+                <span>Full Grooming Package</span>
+                <span class="status-badge completed">Done</span>
+                <span>₱1,200</span>
+            </div>  
+
+            <div class="history-row">
+                <span>Feb 10, 2026</span>
+                <span>Basic Groom &amp; Nail Trim</span>
+                <span class="status-badge completed">Done</span>
+                <span>₱850</span>
+            </div>
+
+            <div class="history-row">
+                <span>Jan 15, 2026</span>
+                <span>Bath &amp; Blow Dry</span>
+                <span class="status-badge scheduled">Scheduled</span>
+                <span>-</span>
+            </div>
+        </div>
+
+        <div class="empty-state" style="display:none;">
+            <p>No grooming history found for this account.</p>
+        </div>
+    </section>
+</div>

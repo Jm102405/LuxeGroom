@@ -1,0 +1,382 @@
+﻿/*
+ * dashboard.css
+ * Shared layout styles for all private (authenticated) pages in LuxeGroom.
+ * Covers the sidebar, navigation, logout button, and main content area.
+ * Loaded globally via Views/Private/_Layout.cshtml.
+ */
+
+/* Reset default margin, padding, and box model */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Base body style — dark background, white text, no overflow */
+body {
+    font-family: 'Manrope', sans-serif;
+    background-color: #0f111a;
+    color: white;
+    overflow: hidden;
+}
+
+/* Full viewport flex container for sidebar + main content */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+
+/* Fixed-width sidebar with dark background and right border */
+.sidebar {
+    width: 260px;
+    background-color: #161925;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Logo row with icon and brand name */
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+/* Logo icon dimensions */
+.logo-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* Brand name text style */
+.logo-text {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+}
+
+/* Vertical nav link list, grows to fill sidebar */
+.nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Individual nav link — muted by default */
+.nav-item {
+    padding: 12px 16px;
+    color: #9ca3af;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+    /* Subtle blue highlight on nav item hover */
+    .nav-item:hover {
+        background-color: rgba(17, 50, 212, 0.1);
+        color: white;
+    }
+
+    /* Solid blue background for the active nav item */
+    .nav-item.active {
+        background-color: #1132d4;
+        color: white;
+    }
+
+/* Logout Section */
+
+/* Logout area separated from nav by a top border */
+.logout-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Logout Button */
+
+/* Full-width transparent logout button with flex layout */
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+    /* Avatar/icon inside the logout button */
+    .logout-btn img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+
+    /* Red logout label text */
+    .logout-btn span {
+        color: #ef4444;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: inherit;
+    }
+
+    /* Faint red background on logout hover */
+    .logout-btn:hover {
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+/* Main Content */
+
+/* Scrollable main area that fills remaining width */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+/* Page header block with title and subtitle */
+.dashboard-header {
+    margin-bottom: 40px;
+}
+
+/* Large serif welcome heading */
+.welcome-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* Gold highlight for the username in the welcome title */
+.username {
+    color: #C5A059;
+}
+
+/* Muted subtitle below the welcome heading */
+.welcome-subtitle {
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+/* Stats Grid */
+
+/* Responsive auto-fit grid for stat cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+/* Individual stat card with icon and value */
+.stat-card {
+    background-color: #161925;
+    padding: 24px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Colored icon box inside the stat card */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* Large bold number shown on the stat card */
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+/* Muted label below the stat value */
+.stat-label {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+/* Activity Section */
+
+/* Section wrapper with top spacing */
+.activity-section {
+    margin-top: 40px;
+}
+
+/* Section heading above the activity card */
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+/* Rounded dark card wrapping activity items */
+.activity-card {
+    background-color: #161925;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Single activity row with icon, details, and status */
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    /* Remove bottom border from the last activity item */
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+/* Circular icon container for each activity */
+.activity-icon {
+    width: 48px;
+    height: 48px;
+    background-color: rgba(17, 50, 212, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* Text block with activity title and description */
+.activity-details {
+    flex: 1;
+}
+
+    /* Activity title text */
+    .activity-details h4 {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    /* Muted activity description text */
+    .activity-details p {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+
+/* Pill-shaped status badge */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+    /* Green badge for completed status */
+    .status-badge.completed {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    /* Amber badge for pending status */
+    .status-badge.pending {
+        background-color: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    /* Purple badge for scheduled status */
+    .status-badge.scheduled {
+        background-color: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+    }
+
+/* ─── REPORTS DROPDOWN (Sidebar) ───────────────────────────────────────────── */
+
+.nav-dropdown {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-dropdown-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 16px;
+    border-radius: 8px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    user-select: none;
+}
+
+    .nav-dropdown-toggle:hover,
+    .nav-dropdown-toggle.active {
+        background: rgba(248, 181, 0, 0.1);
+        color: #f8b500;
+    }
+
+.dropdown-arrow {
+    font-size: 11px;
+    transition: transform 0.25s ease;
+    color: #94a3b8;
+}
+
+.nav-dropdown.open .dropdown-arrow {
+    transform: rotate(180deg);
+    color: #f8b500;
+}
+
+.nav-sub-menu {
+    display: none;
+    flex-direction: column;
+    padding-left: 16px;
+    margin-top: 4px;
+    gap: 2px;
+}
+
+.nav-dropdown.open .nav-sub-menu {
+    display: flex;
+}
+
+.nav-sub-item {
+    display: block;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #94a3b8;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    border-left: 2px solid transparent;
+}
+
+    .nav-sub-item:hover {
+        background: rgba(248, 181, 0, 0.07);
+        color: #f8b500;
+        border-left-color: #f8b500;
+    }
+
+    .nav-sub-item.active {
+        background: rgba(248, 181, 0, 0.12);
+        color: #f8b500;
+        border-left-color: #f8b500;
+        font-weight: 600;
+    }
+    

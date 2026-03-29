@@ -1,0 +1,22 @@
+﻿@*
+ * _Hero.cshtml
+ * Full-screen hero section with background image and CTA button.
+ *@
+
+<section class="hero">
+    <div class="hero-bg" style="background-image: url('@Url.Content("~/images/herobackground.png")');">
+        <div class="hero-overlay"></div>
+    </div>
+    <img src="@Url.Content("~/images/coco.png")" alt="Coco" class="hero-coco" />
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-line"></span>
+            <span class="badge-text">Established in Excellence</span>
+            <span class="badge-line"></span>
+        </div>
+        <h1 class="hero-title">The Pinnacle of <br /><em>Pet Artistry</em></h1>
+        <div class="hero-scroll">
+            <span class="material-symbols-outlined">expand_more</span>
+        </div>
+    </div>
+</section>

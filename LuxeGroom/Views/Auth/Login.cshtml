@@ -1,0 +1,130 @@
+﻿@*
+ * Login.cshtml
+ * Login page for LuxeGroom.
+ * Two-column layout — hero image on the left, login form on the right.
+ * Handles username and password input, error display, and password visibility toggle.
+ *@
+
+@* Bind the view to the LoginViewModel *@
+@model LuxeGroom.Models.LoginViewModel
+
+@* Disable shared layout — this page is fully standalone *@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luxury Grooming Login</title>
+    @* Favicon *@
+    <link rel="icon" type="image/png" href="~/images/browsericon.png" />
+    @* Google Fonts *@
+    <link rel="stylesheet" href="~/css/fonts.css" />
+    @* Login page styles *@
+    <link rel="stylesheet" href="~/css/auth/login.css" />
+</head>
+<body>
+    @* Two-column layout — hero left, form right *@
+    <div class="container">
+
+        @* Left hero panel — hidden on small screens *@
+        <div class="hero-section">
+            <div class="hero-vignette"></div>
+            <div class="hero-image"></div>
+            @* Bottom-left hero text content *@
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="hero-line"></span>
+                    <span class="hero-badge-text">The Elite Standard</span>
+                </div>
+                <h2 class="hero-title">Precision. Grace. Distinction.</h2>
+                <p class="hero-description">Experience the world's most exclusive grooming concierge for the discerning companion.</p>
+            </div>
+        </div>
+
+        @* Right form panel *@
+        <div class="form-section">
+            <div class="form-wrapper">
+
+                @* Page heading and subtitle *@
+                <header class="header">
+                    <div>
+                        <h1 class="title">Sign in to Excellence</h1>
+                        <p class="subtitle">Access your premium pet grooming dashboard and schedule.</p>
+                    </div>
+                </header>
+
+                @* Login form — posts to LoginController *@
+                <form asp-action="Index" asp-controller="Login" method="post" class="login-form">
+                    @* CSRF protection token *@
+                    @Html.AntiForgeryToken()
+
+                    @* Reserved error container — prevents layout shift *@
+                    <div class="error-container">
+                        @* Show error message if login fails *@
+                        @if (ViewBag.ErrorMessage != null)
+                        {
+                            <div class="error-message">
+                                @ViewBag.ErrorMessage
+                            </div>
+                        }
+                    </div>
+
+                    @* Username input field with left person icon *@
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <div class="input-wrapper">
+                            <input asp-for="Username" class="form-input"
+                                   placeholder="Enter your username" type="text" />
+                            <span class="material-symbols-outlined input-icon">person</span>
+                        </div>
+                    </div>
+
+                    @* Password input field with lock icon and visibility toggle *@
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <input asp-for="Password" id="loginPassword" class="form-input"
+                                   placeholder="••••••••" type="password" />
+                            <span class="material-symbols-outlined input-icon">lock</span>
+                            @* Eye icon toggles password visibility *@
+                            <img src="~/images/show.png"
+                                 class="password-toggle"
+                                 onclick="toggleLoginPassword(this)"
+                                 alt="Toggle" />
+                        </div>
+                    </div>
+
+                    @* Forgot password link aligned to the right *@
+                    <div class="forgot-password-section">
+                        <a asp-action="Index" asp-controller="ForgotPassword" class="forgot-password-link">Forgot Password?</a>
+                    </div>
+
+                    @* Submit button — signs the user in *@
+                    <button class="submit-button" type="submit">
+                        Sign In
+                        <span class="material-symbols-outlined">arrow_right_alt</span>
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password input between text and password type
+        function toggleLoginPassword(icon) {
+            const input = document.getElementById('loginPassword');
+            const isPassword = input.type === 'password';
+            // Switch input type based on current state
+            input.type = isPassword ? 'text' : 'password';
+            // Swap eye icon between show and hide image
+            icon.src = isPassword ? '/images/hide.png' : '/images/show.png';
+        }
+    </script>
+</body>
+</html>

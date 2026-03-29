@@ -1,0 +1,97 @@
+﻿/*
+ * customers.css
+ * Styles for Customer Management page in LuxeGroom.
+ * Matches the private dashboard look & feel.
+ */
+
+/* Scrollable wrapper for the list */
+.list-scroll-wrapper {
+    overflow-y: auto;
+    flex: 1;
+}
+
+    .list-scroll-wrapper::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .list-scroll-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .list-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: #2d3748;
+        border-radius: 10px;
+    }
+
+        .list-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+/* Counter beside Customer List title */
+.cust-count {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 400;
+    margin-left: 6px;
+}
+
+/* Layout of a single customer row */
+.customer-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+/* Email + phone line */
+.cust-meta {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-top: 4px;
+}
+
+/* Pet + grooming style line */
+.cust-pet {
+    font-size: 13px;
+    color: #e5e7eb;
+    margin-top: 6px;
+}
+
+/* Last schedule date line */
+.cust-date {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* Right-side (ID, ManagedBy, button) */
+.customer-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+/* Customer ID text */
+.cust-id {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+/* ManagedBy (User/Admin ID) */
+.cust-managedby {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* View Profile chip button */
+.cust-view-btn {
+    cursor: pointer;
+    background: #1132d4;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    border: none;
+    font-weight: 600;
+}

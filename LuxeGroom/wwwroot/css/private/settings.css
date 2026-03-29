@@ -1,0 +1,159 @@
+﻿/*
+ * settings.css
+ * Elegant luxury styling for Account Settings page.
+ * Dark background, soft borders, gold accents, glass cards.
+ */
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+    gap: 24px;
+    margin-top: 8px;
+}
+
+.settings-card {
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.06), transparent 60%), linear-gradient(135deg, rgba(15,23,42,0.96), rgba(15,23,42,0.98));
+    border-radius: 20px;
+    padding: 24px 26px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.85), inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(16px);
+    color: #e5e7eb;
+}
+
+.settings-title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #f9fafb;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .settings-title::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #facc15 0%, #b45309 60%, transparent 70%);
+        box-shadow: 0 0 14px rgba(250, 204, 21, 0.8);
+    }
+
+.settings-subtitle {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+.settings-form {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+}
+
+.form-input {
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(15, 23, 42, 0.9);
+    padding: 9px 12px;
+    font-size: 14px;
+    color: #e5e7eb;
+    outline: none;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+    .form-input::placeholder {
+        color: #6b7280;
+    }
+
+    .form-input:focus {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.7);
+        background: rgba(15, 23, 42, 0.95);
+    }
+
+.form-input--readonly {
+    background: rgba(15, 23, 42, 0.7);
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.form-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-primary {
+    border: none;
+    border-radius: 999px;
+    padding: 9px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #0f172a;
+    background: linear-gradient(135deg, #facc15, #f97316);
+    box-shadow: 0 10px 26px rgba(248, 181, 0, 0.55), 0 0 0 1px rgba(148, 163, 184, 0.55);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow: 0 14px 32px rgba(248, 181, 0, 0.7), 0 0 0 1px rgba(148, 163, 184, 0.7);
+    }
+
+    .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 6px 18px rgba(248, 181, 0, 0.45), 0 0 0 1px rgba(148, 163, 184, 0.6);
+    }
+
+/* Toasts for Settings page */
+.settings-toast {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.settings-toast--success {
+    background: rgba(22, 163, 74, 0.1);
+    color: #bbf7d0;
+    border-color: rgba(22, 163, 74, 0.6);
+}
+
+.settings-toast--error {
+    background: rgba(239, 68, 68, 0.08);
+    color: #fecaca;
+    border-color: rgba(239, 68, 68, 0.65);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .settings-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

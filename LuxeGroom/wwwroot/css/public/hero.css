@@ -1,0 +1,131 @@
+﻿/*
+ * hero.css
+ * Styles for the Hero section of LuxeGroom.
+ * Covers the full-viewport background, dark overlay, mascot image,
+ * hero content, badge, title, and scroll indicator.
+ * Used by _Hero.cshtml.
+ */
+
+/* ===== HERO ===== */
+
+/* Full-viewport hero container — centers content vertically and horizontally */
+.hero {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Absolute background layer with cover image */
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: #0f111a;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+/* Dark gradient overlay fading from top to bottom */
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to bottom, rgba(15,17,26,0.3) 0%, rgba(15,17,26,0.75) 100%);
+}
+
+/* ===== HERO COCO ===== */
+
+/* Mascot image anchored to the bottom center with a drop shadow */
+.hero-coco {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    height: 95vh;
+    width: auto;
+    max-width: 80%;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 0 40px rgba(0, 0, 0, 0.5));
+}
+
+/* Centered content block stacked above the background and mascot */
+.hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    max-width: 900px;
+    padding: 80px 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Gold badge row with lines on both sides of the label */
+.hero-badge {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+/* Thin gold horizontal line in the badge */
+.badge-line {
+    display: block;
+    width: 48px;
+    height: 1px;
+    background: var(--accent-gold);
+}
+
+/* Uppercase wide-spaced gold badge label */
+.badge-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+}
+
+/* Large fluid serif hero heading */
+.hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.1;
+    font-weight: 500;
+    margin-bottom: 48px;
+}
+
+    /* Italic style for emphasized words in the hero title */
+    .hero-title em {
+        font-style: italic;
+    }
+
+/* Scroll indicator icon with bounce animation */
+.hero-scroll {
+    margin-top: 48px;
+    opacity: 0.5;
+    animation: bounce 1.5s infinite;
+}
+
+    /* Scroll arrow icon size */
+    .hero-scroll .material-symbols-outlined {
+        font-size: 32px;
+    }
+
+/* Gentle vertical bounce for the scroll indicator */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(8px);
+    }
+}

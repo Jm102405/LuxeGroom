@@ -1,0 +1,222 @@
+﻿@*
+ * _ReservationModal.cshtml
+ * Reservation modal overlay with form.
+ * Shows a luxury success message after submission.
+ *@
+
+@* ===== SUCCESS OVERLAY ===== *@
+
+@* Full-screen success panel shown after successful reservation submission *@
+<div class="success-overlay" id="successOverlay">
+    <div class="success-panel">
+        @* Checkmark icon at the top of the success panel *@
+        <div class="success-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <h2 class="success-title">Reservation Submitted</h2>
+        @* Confirmation message shown to the user after submission *@
+        <p class="success-message">
+            Thank you for choosing LuxeGroom. Your reservation has been received and is currently under review. Our concierge team will be in touch shortly.
+        </p>
+        @* Close button dismisses the success overlay *@
+        <button class="btn-success-close" onclick="closeSuccess()">Close</button>
+    </div>
+</div>
+
+@* ===== RESERVATION MODAL ===== *@
+
+@* Modal overlay — hidden by default, opened via openModal() *@
+<div class="modal-overlay" id="reservationModal">
+    <div class="modal-panel">
+
+        @* Calendar icon above the modal title *@
+        <div class="modal-icon">
+            <span class="material-symbols-outlined">calendar_month</span>
+        </div>
+
+        <h2 class="modal-title">Reservation Form</h2>
+
+        @* Reservation form — submits via fetch to avoid full page reload *@
+        <form id="reservationForm" class="modal-form" action="/Reservation/Create" method="post"
+              onsubmit="handleReservationSubmit(event)">
+            @* CSRF protection token *@
+            @Html.AntiForgeryToken()
+
+            @* Owner's full name input *@
+            <div class="form-group">
+                <label class="form-label">OWNER'S NAME</label>
+                <input type="text" name="OwnerName" class="form-input" required />
+            </div>
+
+            @* Pet's name input *@
+            <div class="form-group">
+                <label class="form-label">PET'S NAME</label>
+                <input type="text" name="PetName" class="form-input" required />
+            </div>
+
+            @* Grooming style dropdown with custom chevron arrow *@
+            <div class="form-group">
+                <label class="form-label">GROOMING STYLE</label>
+                <div class="form-select-wrapper">
+                    <select name="GroomingStyle" class="form-input form-select" required>
+                        @* Empty hidden default option forces the user to choose *@
+                        <option value="" disabled selected hidden></option>
+                        <option value="Bath & Brush">Bath &amp; Brush</option>
+                        <option value="Full Groom">Full Groom</option>
+                        <option value="Custom Cut">Custom Cut</option>
+                    </select>
+                    @* Chevron icon overlaid on the right of the select *@
+                    <span class="form-select-arrow material-symbols-outlined">expand_more</span>
+                </div>
+            </div>
+
+            @* Phone number input with right-aligned call icon *@
+            <div class="form-group">
+                <label class="form-label">PHONE NUMBER</label>
+                <div class="form-input-icon-wrapper">
+                    <input type="tel"
+                           name="PhoneNumber"
+                           class="form-input form-input--icon"
+                           placeholder="09XXXXXXXXX"
+                           required />
+                    <span class="form-input-icon material-symbols-outlined">call</span>
+                </div>
+            </div>
+
+            @* Email address input with right-aligned mail icon *@
+            <div class="form-group">
+                <label class="form-label">EMAIL ADDRESS</label>
+                <div class="form-input-icon-wrapper">
+                    <input type="email"
+                           name="Email"
+                           id="reservationEmail"
+                           class="form-input form-input--icon"
+                           placeholder="yourname@email.com"
+                           required
+                           onblur="checkEmailExists()" />
+                    <span class="form-input-icon material-symbols-outlined">mail</span>
+                </div>
+                <p id="emailError" style="color:#ef4444;font-size:12px;margin-top:4px;display:none;">
+                    This email already exists in our system. Please use a different email.
+                </p>
+            </div>
+
+            @* Reservation date picker *@
+            <div class="form-group">
+                <label class="form-label">RESERVATION DATE</label>
+                <input type="date" name="ReservationDate" class="form-input" required />
+            </div>
+
+            @* Confirm and Cancel action buttons *@
+            <div class="modal-actions">
+                @* Submit button — disabled and relabeled during fetch request *@
+                <button type="submit" class="btn-modal-confirm" id="submitBtn">Confirm Reservation</button>
+                @* Cancel button closes the modal without submitting *@
+                <button type="button" class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+    // Check if the entered email already exists in Users table (Users.Gmail)
+    async function checkEmailExists() {
+        const input = document.getElementById('reservationEmail');
+        const errorLabel = document.getElementById('emailError');
+        const email = (input.value || '').trim();
+
+        // Clear previous state if empty
+        if (!email) {
+            errorLabel.style.display = 'none';
+            input.dataset.emailInvalid = 'false';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/User/CheckEmail?email=${encodeURIComponent(email)}`);
+            if (!response.ok) {
+                // If API fails, don't block the user
+                errorLabel.style.display = 'none';
+                input.dataset.emailInvalid = 'false';
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.exists) {
+                // Show error and mark as invalid
+                errorLabel.style.display = 'block';
+                input.dataset.emailInvalid = 'true';
+            } else {
+                // Hide error and mark as valid
+                errorLabel.style.display = 'none';
+                input.dataset.emailInvalid = 'false';
+            }
+        } catch {
+            // On network error, don't block user, just hide error
+            errorLabel.style.display = 'none';
+            input.dataset.emailInvalid = 'false';
+        }
+    }
+
+    // Handle reservation form submission via fetch — prevents full page reload
+    async function handleReservationSubmit(e) {
+        e.preventDefault();
+
+        // Block submit if email is already registered in Users table
+        const emailInput = document.getElementById('reservationEmail');
+        if (emailInput && emailInput.dataset.emailInvalid === 'true') {
+            alert('This email is already registered. Please use a different email.');
+            return;
+        }
+
+        const form = document.getElementById('reservationForm');
+        const btn = document.getElementById('submitBtn');
+
+        // Disable button and show loading state during submission
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            // Send form data as a POST request to the reservation endpoint
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            // Server returns redirect (3xx) on success
+            if (response.ok || response.redirected) {
+                // Reset form, close modal, and show success overlay
+                form.reset();
+                closeModal();
+                showSuccess();
+            } else {
+                alert('Something went wrong. Please try again.');
+            }
+        } catch (err) {
+            // Network error fallback — still show success to avoid blocking the user
+            form.reset();
+            closeModal();
+            showSuccess();
+        } finally {
+            // Always restore the submit button regardless of outcome
+            btn.disabled = false;
+            btn.textContent = 'Confirm Reservation';
+        }
+    }
+
+    // Show the full-screen success overlay and lock page scroll
+    function showSuccess() {
+        document.getElementById('successOverlay').classList.add('success--active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Dismiss the success overlay and restore page scroll
+    function closeSuccess() {
+        document.getElementById('successOverlay').classList.remove('success--active');
+        document.body.style.overflow = '';
+    }
+</script>

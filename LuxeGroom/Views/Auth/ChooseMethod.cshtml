@@ -1,0 +1,111 @@
+﻿@*
+ * ChooseMethod.cshtml
+ * Step 2 of the forgot password flow.
+ * User picks how to receive the reset code — Gmail or SMS.
+ * SMS option is shown but disabled (not available — requires paid service).
+ *@
+
+@* Disable shared layout — this page is fully standalone *@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choose Method — LuxeGroom</title>
+    @* Favicon *@
+    <link rel="icon" type="image/png" href="~/images/browsericon.png" />
+    @* Google Fonts *@
+    <link rel="stylesheet" href="~/css/fonts.css" />
+    @* Forgot password shared styles *@
+    <link rel="stylesheet" href="~/css/auth/forgotpassword.css" />
+</head>
+<body>
+    @* Two-column layout — hero left, form right *@
+    <div class="container">
+
+        @* Left hero panel — hidden on small screens *@
+        <div class="hero-section">
+            <div class="hero-vignette"></div>
+            <div class="hero-image"></div>
+            @* Bottom-left hero text content *@
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="hero-line"></span>
+                    <span class="hero-badge-text">The Elite Standard</span>
+                </div>
+                <h2 class="hero-title">Precision. Grace. Distinction.</h2>
+                <p class="hero-description">Experience the world's most exclusive grooming concierge for the discerning companion.</p>
+            </div>
+        </div>
+
+        @* Right form panel *@
+        <div class="form-section">
+            <div class="form-wrapper">
+
+                @* Back link to Step 1 — ForgotPassword *@
+                <a asp-action="Index" asp-controller="ForgotPassword" class="back-link">
+                    <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+                    Back
+                </a>
+
+                @* Step icon above the title *@
+                <div class="step-icon">📬</div>
+                <h1 class="title">Choose a Method</h1>
+
+                @* Subtitle with the verified username highlighted *@
+                <p class="subtitle">
+                    Select how you'd like to receive your verification code,
+                    <strong style="color: #f3f4f6;">@ViewBag.Username</strong>.
+                </p>
+
+                @* Reserved error container — prevents layout shift *@
+                <div class="error-container">
+                    @* Show error message if one exists *@
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="error-message">@ViewBag.ErrorMessage</div>
+                    }
+                </div>
+
+                @* Method selection cards *@
+                <div class="method-cards">
+
+                    @* Gmail card — active, routes to SendCode with gmail method *@
+                    <a asp-action="Index"
+                       asp-controller="SendCode"
+                       asp-route-username="@ViewBag.Username"
+                       asp-route-method="gmail"
+                       class="method-card">
+                        <div class="method-card-icon">✉️</div>
+                        <div class="method-card-info">
+                            <strong>Send via Gmail</strong>
+                            @* Show masked Gmail address *@
+                            <span>@ViewBag.MaskedGmail</span>
+                        </div>
+                        <span class="material-symbols-outlined method-card-arrow">chevron_right</span>
+                    </a>
+
+                    @* SMS card — disabled, pointer-events blocked via CSS *@
+                    <div class="method-card disabled">
+                        <div class="method-card-icon">📱</div>
+                        <div class="method-card-info">
+                            <strong>Send via SMS</strong>
+                            @* Show masked phone number *@
+                            <span>@ViewBag.MaskedPhone</span>
+                            @* Unavailable badge shown below the phone number *@
+                            <span class="unavailable-badge">Unavailable</span>
+                        </div>
+                        <span class="material-symbols-outlined method-card-arrow">chevron_right</span>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

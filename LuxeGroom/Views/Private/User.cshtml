@@ -1,0 +1,518 @@
+﻿@*
+ * User.cshtml
+ * Combined User Management view for LuxeGroom.
+ * Merged from Users.cshtml and AddUser.cshtml.
+ * Shows the user list by default (ViewBag.ShowForm == false).
+ * Shows the add/edit form when ViewBag.ShowForm == true.
+ * Connected to UserController.cs.
+ *@
+
+@model LuxeGroom.Models.UserViewModel
+
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+
+    bool showForm = ViewBag.ShowForm == true;
+    bool isEdit = ViewBag.IsEdit == true;
+
+    ViewBag.Title = showForm
+        ? (isEdit ? "Edit User" : "Add New User")
+        : "User Management";
+
+    var activeUsers = ViewBag.ActiveUsers as List<LuxeGroom.Data.Generated.User>;
+    var inactiveUsers = ViewBag.InactiveUsers as List<LuxeGroom.Data.Generated.User>;
+    var selectedRole = Model?.Role ?? "";
+}
+
+<link rel="stylesheet" href="~/css/private/user.css" />
+
+
+@* ═══════════════════════════════════════════════════════════════════════════════
+   FORM SECTION — shown when ViewBag.ShowForm == true (Add or Edit User)
+   ═══════════════════════════════════════════════════════════════════════════════ *@
+@if (showForm)
+{
+    <header class="dashboard-header">
+        <h1 class="welcome-title">@(isEdit ? "Edit User" : "Add New User")</h1>
+        <p class="welcome-subtitle">
+            @(isEdit ? "Update user information and access level."
+                    : "Create a new account. A temporary password will be sent to the user's email.")
+    </p>
+</header>
+
+    <div class="activity-section form-section">
+        <div class="user-form-container">
+
+            @* Error alert *@
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+            {
+                <div class="error-alert">
+                    <p>⚠️ @ViewBag.ErrorMessage</p>
+                </div>
+            }
+
+            <form method="post"
+                  asp-action="@(isEdit ? "EditUser" : "AddUser")"
+                  asp-controller="User"
+                  onsubmit="return validateEmail()">
+                @Html.AntiForgeryToken()
+
+                @if (isEdit)
+                {
+                    @* Pass UserID back to the controller *@
+                    <input type="hidden" name="UserID" value="@Model?.UserID" />
+                    @* Preserve existing Status so it is never null on POST *@
+                    <input type="hidden" name="Status" value="@Model?.Status" />
+                }
+
+                @* Username input *@
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" name="Username" class="form-input"
+                               placeholder="e.g. jsmith_groomer" required
+                               value="@Model?.Username" />
+                    </div>
+                </div>
+
+                @* Email address input *@
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" name="Gmail" id="emailInput" class="form-input"
+                               placeholder="jsmith@email.com" required
+                               value="@Model?.Gmail" />
+                    </div>
+                    <p class="field-hint">Enter a valid email address.</p>
+                </div>
+
+                @* Phone number and role side by side *@
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">📞</span>
+                            <input type="tel" name="PhoneNumber" class="form-input"
+                                   placeholder="+63 912 345 6789"
+                                   value="@Model?.PhoneNumber" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">System Role</label>
+                        <div class="input-wrapper">
+                            <span class="input-icon">🛡️</span>
+                            <select name="Role" class="form-input" required>
+                                <option value="">Select a role</option>
+                                @if (selectedRole == "Admin")
+                                {
+                                    <option value="Admin" selected>Admin</option>
+                                    <option value="User">User</option>
+                                }
+                                else if (selectedRole == "User")
+                                {
+                                    <option value="Admin">Admin</option>
+                                    <option value="User" selected>User</option>
+                                }
+                                else
+                                {
+                                    <option value="Admin">Admin</option>
+                                    <option value="User">User</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                @* Active account toggle and email notice — Add mode only *@
+                @if (!isEdit)
+                {
+                    <div class="toggle-container">
+                        <div class="toggle-label">
+                            <strong>Active Account</strong>
+                            <span>Allow user to login immediately</span>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleStatus(this)">
+                            <div class="toggle-switch-circle"></div>
+                        </div>
+                        <input type="hidden" name="Status" id="statusInput" value="Active" />
+                    </div>
+
+                    <div class="email-notice">
+                        <span>📧</span>
+                        <p>A temporary password will be auto-generated and sent to the user's email upon account creation.</p>
+                    </div>
+                }
+
+                <div class="form-buttons">
+                    <button type="button" class="btn-cancel"
+                            onclick="location.href='/User/Users'">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-create">
+                        @(isEdit ? "Update User" : "Create User")
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleStatus(element) {
+            element.classList.toggle('active');
+            const input = document.getElementById('statusInput');
+            input.value = element.classList.contains('active') ? 'Active' : 'Inactive';
+        }
+
+        function validateEmail() {
+            return true;
+        }
+    </script>
+}
+else
+{
+    @* ═══════════════════════════════════════════════════════════════════════════
+       LIST SECTION — shown by default (User Management listing)
+       ═══════════════════════════════════════════════════════════════════════════ *@
+
+    <header class="dashboard-header">
+        <h1 class="welcome-title">User Management</h1>
+        <p class="welcome-subtitle">Manage system users and their access permissions.</p>
+    </header>
+
+    <div class="activity-section">
+
+        @* Section header with title and action buttons *@
+        <div class="section-header">
+
+            @* Title updates via JS when toggling between Active and Inactive lists *@
+            <h2 class="section-title" id="sectionTitle">
+                Active Users (@(activeUsers?.Count ?? 0))
+            </h2>
+
+            <div class="header-buttons">
+
+                @* Add New User button — routes to UserController.AddUser *@
+                <button class="header-icon-btn add-user-btn" id="addUserBtn"
+                        onclick="location.href='/User/AddUser'">
+                    <img src="~/images/add-user.png" alt="Add User" />
+                    <span>Add New User</span>
+                </button>
+
+                @* Toggle button — switches between Active and Inactive lists *@
+                <button class="header-icon-btn toggle-inactive-btn" onclick="toggleList()">
+                    <img src="~/images/inactive.png" alt="Toggle" id="toggleBtnIcon" />
+                    <span id="toggleBtnText">Show Inactive</span>
+                </button>
+
+            </div>
+
+        </div>
+
+        @* Search bar — filters visible rows on every keystroke *@
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" class="search-input"
+                   placeholder="Search by username, email, or role..."
+                   oninput="filterUsers()" />
+        </div>
+
+        @* Hidden message shown when search returns no matching rows *@
+        <div class="no-results" id="noResults" style="display:none;">
+            <p>No users found matching your search.</p>
+        </div>
+
+        @* Scrollable list area containing both Active and Inactive cards *@
+        <div class="list-scroll-wrapper">
+
+            @* Active Users List — visible by default *@
+            <div class="activity-card" id="activeList">
+                @if (activeUsers != null && activeUsers.Count > 0)
+                {
+                    foreach (var user in activeUsers)
+                    {
+                        @* User row — data attributes used for JS search filtering *@
+                        <div class="activity-item user-row"
+                             data-username="@user.Username.ToLower()"
+                             data-email="@user.Gmail.ToLower()"
+                             data-role="@user.Role.ToLower()">
+
+                            @* Role icon — crown for Admin, person for User *@
+                            <div class="activity-icon">
+                                @if (user.Role == "Admin")
+                                {
+                                    <span>👑</span>
+                                }
+                                else
+                                {
+                                    <span>👤</span>
+                                }
+                            </div>
+
+                            @* User details — username, email, role, and creation date *@
+                            <div class="activity-details">
+                                <h4>@user.Username</h4>
+                                <p>@user.Gmail - @user.Role</p>
+                                <small class="date-created">Created: @user.DateCreated.ToString("MMM dd, yyyy")</small>
+                            </div>
+
+                            @* Per-row action buttons *@
+                            <div class="action-buttons">
+
+                                @* Edit button — routes to UserController.EditUser *@
+                                <button class="icon-btn edit-btn"
+                                        onclick="location.href='/User/EditUser?id=@user.UserId'"
+                                        title="Edit">
+                                    <img src="~/images/edit.png" alt="Edit" />
+                                </button>
+
+                                @* Deactivate button — triggers luxury confirm modal *@
+                                <button class="icon-btn delete-btn"
+                                        onclick="confirmDelete('@user.UserId', '@user.Username')"
+                                        title="Deactivate">
+                                    <img src="~/images/deactivate.png" alt="Deactivate" />
+                                </button>
+
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <p>No active users found.</p>
+                    </div>
+                }
+            </div>
+
+            @* Inactive Users List — hidden by default, shown when toggled *@
+            <div class="activity-card" id="inactiveList" style="display:none;">
+                @if (inactiveUsers != null && inactiveUsers.Count > 0)
+                {
+                    foreach (var user in inactiveUsers)
+                    {
+                        @* User row — data attributes used for JS search filtering *@
+                        <div class="activity-item user-row"
+                             data-username="@user.Username.ToLower()"
+                             data-email="@user.Gmail.ToLower()"
+                             data-role="@user.Role.ToLower()">
+
+                            @* Role icon — crown for Admin, person for User *@
+                            <div class="activity-icon">
+                                @if (user.Role == "Admin")
+                                {
+                                    <span>👑</span>
+                                }
+                                else
+                                {
+                                    <span>👤</span>
+                                }
+                            </div>
+
+                            @* User details — username, email, role, and creation date *@
+                            <div class="activity-details">
+                                <h4>@user.Username</h4>
+                                <p>@user.Gmail - @user.Role</p>
+                                <small class="date-created">Created: @user.DateCreated.ToString("MMM dd, yyyy")</small>
+                            </div>
+
+                            @* Per-row action buttons *@
+                            <div class="action-buttons">
+
+                                @* Activate button — triggers luxury confirm modal *@
+                                <button class="icon-btn activate-btn"
+                                        onclick="confirmActivate('@user.UserId', '@user.Username')"
+                                        title="Activate">
+                                    <img src="~/images/activate.png" alt="Activate" />
+                                </button>
+
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <p>No inactive users found.</p>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+
+    @* ─── Luxury Confirm Modal ──────────────────────────────────────────────────── *@
+    @* Single reusable modal — content and accent color swapped by JS per action *@
+    <div class="lux-modal-overlay" id="luxModal" onclick="handleOverlayClick(event)">
+        <div class="lux-modal" id="luxModalBox">
+
+            @* Decorative top accent bar — color set by JS (red or green) *@
+            <div class="lux-modal-accent" id="luxModalAccent"></div>
+
+            @* Modal icon — emoji set by JS per action *@
+            <div class="lux-modal-icon" id="luxModalIcon"></div>
+
+            @* Modal badge label *@
+            <div class="lux-modal-badge" id="luxModalBadge"></div>
+
+            @* Modal title *@
+            <h3 class="lux-modal-title" id="luxModalTitle"></h3>
+
+            @* Modal body message *@
+            <p class="lux-modal-body" id="luxModalBody"></p>
+
+            @* Username pill highlight *@
+            <div class="lux-modal-user" id="luxModalUser"></div>
+
+            @* Divider line *@
+            <div class="lux-modal-divider"></div>
+
+            @* Action buttons row *@
+            <div class="lux-modal-actions">
+                <button class="lux-modal-btn lux-btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="lux-modal-btn lux-btn-confirm" id="luxModalConfirm"></button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Track whether the inactive list is currently visible
+        let showingInactive = false;
+
+        // Toggle between Active and Inactive user lists
+        function toggleList() {
+            const activeList   = document.getElementById('activeList');
+            const inactiveList = document.getElementById('inactiveList');
+            const title        = document.getElementById('sectionTitle');
+            const btnText      = document.getElementById('toggleBtnText');
+            const btnIcon      = document.getElementById('toggleBtnIcon');
+            const addUserBtn   = document.getElementById('addUserBtn');
+
+            // Clear search input and reset filter before switching lists
+            document.getElementById('searchInput').value = '';
+            filterUsers();
+
+            showingInactive = !showingInactive;
+
+            if (showingInactive) {
+                activeList.style.display   = 'none';
+                inactiveList.style.display = 'block';
+                addUserBtn.style.display   = 'none';
+                title.textContent   = 'Inactive Users (@(inactiveUsers?.Count ?? 0))';
+                btnText.textContent = 'Show Active';
+                btnIcon.src         = '/images/active.png';
+            } else {
+                activeList.style.display   = 'block';
+                inactiveList.style.display = 'none';
+                addUserBtn.style.display   = 'flex';
+                title.textContent   = 'Active Users (@(activeUsers?.Count ?? 0))';
+                btnText.textContent = 'Show Inactive';
+                btnIcon.src         = '/images/inactive.png';
+            }
+        }
+
+        // Filter visible rows in the current list based on search query
+        function filterUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const currentList = showingInactive
+                ? document.getElementById('inactiveList')
+                : document.getElementById('activeList');
+
+            const rows = currentList.querySelectorAll('.user-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const username = row.dataset.username || '';
+                const email    = row.dataset.email    || '';
+                const role     = row.dataset.role     || '';
+
+                const matches = username.includes(query) ||
+                                email.includes(query)    ||
+                                role.includes(query);
+
+                row.style.display = matches ? 'flex' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            document.getElementById('noResults').style.display =
+                visibleCount === 0 && query !== '' ? 'block' : 'none';
+        }
+
+        // ─── Luxury Modal Logic ─────────────────────────────────────────────────────
+
+        // Open the modal and configure it for the Deactivate action
+        function confirmDelete(userId, username) {
+            openModal({
+                icon:         '🚫',
+                badge:        'Deactivate User',
+                badgeClass:   'badge-deactivate',
+                title:        'Confirm Deactivation',
+                body:         'This user will lose access to the system and be moved to the Inactive list.',
+                username:     username,
+                confirmText:  'Deactivate',
+                confirmClass: 'confirm-deactivate',
+                accentColor:  '#ef4444',
+                onConfirm:    () => { location.href = '/User/DeleteUser?id=' + userId; }
+            });
+        }
+
+        // Open the modal and configure it for the Activate action
+        function confirmActivate(userId, username) {
+            openModal({
+                icon:         '✅',
+                badge:        'Activate User',
+                badgeClass:   'badge-activate',
+                title:        'Confirm Activation',
+                body:         'This user will regain full system access and be moved to the Active list.',
+                username:     username,
+                confirmText:  'Activate',
+                confirmClass: 'confirm-activate',
+                accentColor:  '#22c55e',
+                onConfirm:    () => { location.href = '/User/ActivateUser?id=' + userId; }
+            });
+        }
+
+        // Populate and open the modal with the given config
+        function openModal(config) {
+            document.getElementById('luxModalAccent').style.background = config.accentColor;
+            document.getElementById('luxModalIcon').textContent         = config.icon;
+            document.getElementById('luxModalBadge').textContent        = config.badge;
+            document.getElementById('luxModalBadge').className          = 'lux-modal-badge ' + config.badgeClass;
+            document.getElementById('luxModalTitle').textContent        = config.title;
+            document.getElementById('luxModalBody').textContent         = config.body;
+            document.getElementById('luxModalUser').textContent         = '👤 ' + config.username;
+
+            const confirmBtn       = document.getElementById('luxModalConfirm');
+            confirmBtn.textContent = config.confirmText;
+            confirmBtn.className   = 'lux-modal-btn lux-btn-confirm ' + config.confirmClass;
+            confirmBtn.onclick     = () => { closeModal(); config.onConfirm(); };
+
+            const overlay = document.getElementById('luxModal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('visible'), 10);
+        }
+
+        // Close the modal with reverse animation
+        function closeModal() {
+            const overlay = document.getElementById('luxModal');
+            overlay.classList.remove('visible');
+            setTimeout(() => { overlay.style.display = 'none'; }, 300);
+        }
+
+        // Close modal when clicking the dark overlay
+        function handleOverlayClick(e) {
+            if (e.target === document.getElementById('luxModal')) closeModal();
+        }
+
+        // Allow pressing Escape to dismiss the modal
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+}

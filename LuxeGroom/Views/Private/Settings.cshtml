@@ -1,0 +1,98 @@
+﻿@*
+ * Settings.cshtml
+ * Account Settings page for LuxeGroom.
+ * Allows the logged-in user to view their profile info and change their password.
+ * Username and Role fields are read-only.
+ *@
+
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewBag.Title = "Settings";
+}
+
+<link rel="stylesheet" href="~/css/private/settings.css" />
+
+<header class="dashboard-header">
+    <h1 class="welcome-title">Account Settings</h1>
+    <p class="welcome-subtitle">Manage your account details and security preferences.</p>
+</header>
+
+<div class="settings-grid">
+
+    <!-- Profile card -->
+    <section class="settings-card">
+        <h2 class="settings-title">Profile Information</h2>
+        <p class="settings-subtitle">
+            View your basic profile details. Username and role are system-managed.
+        </p>
+
+        <form class="settings-form">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text"
+                       class="form-input form-input--readonly"
+                       value="@ViewBag.Username"
+                       readonly />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text"
+                       class="form-input form-input--readonly"
+                       value="@ViewBag.Role"
+                       readonly />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email"
+                       class="form-input"
+                       placeholder="user@luxegroom.com" />
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary">
+                    Update Profile
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Password card -->
+    <section class="settings-card">
+        <h2 class="settings-title">Change Password</h2>
+        <p class="settings-subtitle">
+            Set a strong, unique password to keep your LuxeGroom account secure.
+        </p>
+
+        <form class="settings-form">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password"
+                       class="form-input"
+                       placeholder="••••••••" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password"
+                       class="form-input"
+                       placeholder="••••••••" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password"
+                       class="form-input"
+                       placeholder="••••••••" />
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-primary">
+                    Change Password
+                </button>
+            </div>
+        </form>
+    </section>
+
+</div>

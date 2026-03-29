@@ -1,0 +1,78 @@
+﻿@*
+ * _Showcase.cshtml
+ * Gallery / Service Showcase section with three groups.
+ *@
+
+<section class="showcase" id="gallery">
+    <div class="container">
+
+        <div class="showcase-header">
+            <span class="showcase-eyebrow">Visual Excellence</span>
+            <h2>Service Showcase</h2>
+            <div class="showcase-divider"></div>
+        </div>
+
+        <!-- Bath & Brush -->
+        <div class="showcase-group">
+            <div class="showcase-group-header">
+                <h3><em>Bath &amp; Brush</em></h3>
+                <div class="showcase-group-line"></div>
+            </div>
+            <div class="showcase-grid showcase-grid--portrait">
+                <div class="showcase-item">
+                    <img src="@Url.Content("~/images/gallery/bath1.jpg")" alt="Clean shiny dog in spa setting" />
+                    <div class="showcase-overlay"></div>
+                </div>
+                <div class="showcase-item">
+                    <img src="@Url.Content("~/images/gallery/bath2.jpg")" alt="Well brushed companion" />
+                    <div class="showcase-overlay"></div>
+                </div>
+                <div class="showcase-item">
+                    <img src="@Url.Content("~/images/gallery/bath3.jpg")" alt="Pristine grooming results" />
+                    <div class="showcase-overlay"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Groom -->
+        <div class="showcase-group">
+            <div class="showcase-group-header">
+                <h3><em>Full Groom</em></h3>
+                <div class="showcase-group-line"></div>
+            </div>
+            <div class="showcase-grid showcase-grid--landscape">
+                <div class="showcase-item showcase-item--overlay">
+                    <img src="@Url.Content("~/images/fullgroom1.png")" alt="Full groom result 1" />
+                    <div class="showcase-overlay"></div>
+                </div>
+                <div class="showcase-item showcase-item--overlay">
+                    <img src="@Url.Content("~/images/gallery/groom2.jpg")" alt="Full groom result 2" />
+                    <div class="showcase-overlay"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Cut -->
+        <div class="showcase-group">
+            <div class="showcase-group-header">
+                <h3><em>Custom Cut</em></h3>
+                <div class="showcase-group-line"></div>
+            </div>
+            <div class="showcase-grid showcase-grid--square">
+                <div class="showcase-item showcase-item--bordered">
+                    <img src="@Url.Content("~/images/leoteddycut.png")" alt="Teddy Cut style" />
+                    <div class="showcase-overlay"></div>
+                </div>
+                <div class="showcase-item showcase-item--bordered">
+                    <img src="@Url.Content("~/images/cocopuppycut.png")" alt="Puppy Cut style" />
+                    <div class="showcase-overlay"></div>
+                </div>
+                <div class="showcase-item showcase-item--bordered">
+                    <img src="@Url.Content("~/images/leocustomcut.png")" alt="Bespoke creative styling" />
+                    <div class="showcase-overlay"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
