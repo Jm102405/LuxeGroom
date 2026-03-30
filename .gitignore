@@ -143,9 +143,10 @@ coverage*.info
 Thumbs.db
 
 # ============================================
-# SENSITIVE CONFIG â€” DO NOT PUSH
+# SENSITIVE CONFIG — DO NOT PUSH
 # ============================================
 appsettings.Development.json
+appsettings.json
 
 # Note: appsettings.json IS pushed (with placeholder connection string)
 # Teammates will configure their own local connection string
