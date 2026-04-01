@@ -1,0 +1,84 @@
+﻿@*
+ * _Layout.cshtml
+ * Shared layout for the Customer Portal in LuxeGroom.
+ * Sidebar with 4 nav items: Payment, My Bookings, Reserve, Settings.
+ * Separate from the admin/staff _Layout.cshtml.
+ * Created in Thread 3.6.
+ *@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - LuxeGroom Customer Portal</title>
+    <link rel="icon" type="image/png" href="~/images/browsericon.png" />
+    <link rel="stylesheet" href="~/css/fonts.css" />
+    <link rel="stylesheet" href="~/css/private/dashboard.css" />
+    <link rel="stylesheet" href="~/css/private/customer-portal.css" />
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="#1132d4"></path>
+                    </svg>
+                </div>
+                <h2 class="logo-text">LUXE GROOM</h2>
+            </div>
+
+            @* Customer greeting *@
+            <div class="sidebar-greeting">
+                <p class="greeting-label">Welcome back,</p>
+                <p class="greeting-name">@ViewBag.CustomerFirstname</p>
+            </div>
+
+            <nav class="nav-menu">
+
+                <a href="/CustomerPortal/Payment"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Payment" ? "active" : "")">
+                    Payment
+                </a>
+
+                <a href="/CustomerPortal/MyBookings"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MyBookings" ? "active" : "")">
+                    My Bookings
+                </a>
+
+                <a href="/CustomerPortal/Reserve"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Reserve" ? "active" : "")">
+                    Reserve
+                </a>
+
+                <a href="/CustomerPortal/Settings"
+                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
+                    Settings
+                </a>
+
+            </nav>
+
+            <div class="logout-section">
+                <button class="logout-btn" onclick="confirmLogout()">
+                    <img src="~/images/logout.png" alt="Logout" />
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script>
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                location.href = '/CustomerLogin/Logout';
+            }
+        }
+    </script>
+</body>
+</html>
