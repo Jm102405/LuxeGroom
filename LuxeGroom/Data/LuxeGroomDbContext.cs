@@ -32,6 +32,9 @@ public partial class LuxeGroomDbContext : DbContext
     // DbSet for the Customers table
     public virtual DbSet<Customer> Customers { get; set; }
 
+    // for the chatbot 
+    public DbSet<Chatbot> Chatbot { get; set; }
+
     // Configure entity keys and default values via Fluent API
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +63,20 @@ public partial class LuxeGroomDbContext : DbContext
 
             // Default CreatedAt to the current SQL Server datetime
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+        });
+
+        modelBuilder.Entity<Chatbot>(entity =>
+        {
+            entity.ToTable("Chatbot");
+            entity.HasKey(e => e.Id);  // PRIMARY KEY
+            entity.Property(e => e.Instructions)
+                .HasMaxLength(500)
+                .IsRequired();
+            entity.Property(e => e.Data)
+                .HasMaxLength(500)
+                .IsRequired();
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("GETDATE()");
         });
 
         // Hook for additional partial model configuration
