@@ -1,7 +1,7 @@
 ﻿@*
  * Customers.cshtml
  * Customer Management page for LuxeGroom.
- * Displays customers with their latest pet reservation info.
+ * Updated in Thread 3.7: Added payment status, receipt preview, filter tabs, approve button.
  *@
 
 @using LuxeGroom.Models
@@ -14,9 +14,18 @@
 
 <link rel="stylesheet" href="~/css/private/customers.css" />
 
+@if (TempData["Success"] != null)
+{
+    <div class="toast toast--success" id="toastMsg">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast toast--error" id="toastMsg">@TempData["Error"]</div>
+}
+
 <header class="dashboard-header">
     <h1 class="welcome-title">Customer Management</h1>
-    <p class="welcome-subtitle">View and manage your client database and pet profiles.</p>
+    <p class="welcome-subtitle">View and manage your client database and payment status.</p>
 </header>
 
 <div class="activity-section">
@@ -24,18 +33,48 @@
     <div class="section-header">
         <h2 class="section-title">
             Customer List
-            <span class="cust-count">(@Model.Count)</span>
+            <span class="cust-count" id="visibleCount">(@Model.Count)</span>
         </h2>
     </div>
 
+    @* Search *@
+    <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input"
+               placeholder="Search name, email, pet..."
+               oninput="applyFilters()" />
+    </div>
+
+    @* Payment filter tabs *@
+    <div class="res-tabs">
+        <button class="res-tab active" onclick="setTab('all', this)">All</button>
+        <button class="res-tab" onclick="setTab('Unpaid', this)">Unpaid</button>
+        <button class="res-tab" onclick="setTab('Pending Review', this)">Pending Review</button>
+        <button class="res-tab" onclick="setTab('Paid', this)">Paid</button>
+    </div>
+
+    <div class="no-results" id="noResults" style="display:none;">
+        <p>No customers found.</p>
+    </div>
+
     <div class="list-scroll-wrapper">
-        <div class="activity-card">
+        <div class="activity-card" id="customerList">
 
             @if (Model.Count > 0)
             {
                 foreach (var c in Model)
                 {
-                    <div class="activity-item customer-row">
+                    string payBadgeClass = c.PaymentStatus switch
+                    {
+                        "Paid" => "badge--confirmed",
+                        "Pending Review" => "badge--pending",
+                        _ => "badge--cancelled"
+                    };
+
+                    <div class="activity-item customer-row"
+                         data-payment="@c.PaymentStatus"
+                         data-search="@(c.FullName.ToLower()) @(c.Email.ToLower()) @((c.PetName ?? "").ToLower())">
+
                         <div class="activity-icon">👤</div>
 
                         <div class="activity-details">
@@ -46,33 +85,86 @@
                                 <span>@c.Phone</span>
                             </p>
 
-                            <p class="cust-pet">
-                                @if (!string.IsNullOrEmpty(c.PetName))
-                                {
-                                    <span>Pet: <strong>@c.PetName</strong> (@c.GroomingStyle)</span>
-                                }
-                                else
-                                {
-                                    <span>No pet reservation linked yet.</span>
-                                }
-                            </p>
+                            @if (!string.IsNullOrEmpty(c.PetName))
+                            {
+                                <p class="cust-pet">
+                                    Pet: <strong>@c.PetName</strong>
+                                    (@c.PetSize — @c.GroomingStyle)
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="cust-pet">No pet reservation linked yet.</p>
+                            }
 
                             @if (c.ReservationDate.HasValue)
                             {
                                 <p class="cust-date">
-                                    Last schedule:
-                                    @c.ReservationDate.Value.ToString("MMMM dd, yyyy")
+                                    Schedule: @c.ReservationDate.Value.ToString("MMMM dd, yyyy")
                                 </p>
+                            }
+
+                            @* Payment info row *@
+                            @if (c.AmountDue.HasValue)
+                            {
+                                <div class="cust-payment-info">
+                                    <span class="cust-payment-label">Down Payment Due:</span>
+                                    <span class="cust-payment-amount">₱@c.AmountDue.Value.ToString("N0")</span>
+
+                                    @if (!string.IsNullOrEmpty(c.ReferenceNumber))
+                                    {
+                                        <span class="cust-payment-ref">Ref: @c.ReferenceNumber</span>
+                                    }
+
+                                    @if (c.PaidAt.HasValue)
+                                    {
+                                        <span class="cust-payment-paidat">
+                                            Paid: @c.PaidAt.Value.ToString("MMM dd, yyyy h:mm tt")
+                                        </span>
+                                    }
+
+                                    @if (!string.IsNullOrEmpty(c.PaymentManagedBy))
+                                    {
+                                        <span class="cust-payment-approver">
+                                            Approved by: @c.PaymentManagedBy
+                                        </span>
+                                    }
+                                </div>
+                            }
+
+                            @* Receipt image preview *@
+                            @if (!string.IsNullOrEmpty(c.ReceiptImage))
+                            {
+                                <div class="cust-receipt-wrapper">
+                                    <p class="cust-receipt-label">Receipt:</p>
+                                    <img src="/@c.ReceiptImage"
+                                         alt="Receipt"
+                                         class="cust-receipt-thumb"
+                                         onclick="openReceiptModal('/@c.ReceiptImage')" />
+                                </div>
                             }
                         </div>
 
                         <div class="customer-side">
                             <p class="cust-id">ID: @c.CustomerId</p>
                             <p class="cust-managedby">Managed by: @c.ManagedBy</p>
-                            <button class="status-badge cust-view-btn">
-                                View Profile
-                            </button>
+                            <span class="status-badge @payBadgeClass">@c.PaymentStatus</span>
+
+                            @* Approve button — only for Pending Review *@
+                            @if (c.PaymentStatus == "Pending Review" && c.PaymentId.HasValue)
+                            {
+                                <form method="post" action="/Customers/ApprovePayment"
+                                      style="margin-top:8px;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="paymentId" value="@c.PaymentId" />
+                                    <button type="submit" class="btn-approve-payment">
+                                        <span class="material-symbols-outlined">check_circle</span>
+                                        Approve Payment
+                                    </button>
+                                </form>
+                            }
                         </div>
+
                     </div>
                 }
             }
@@ -86,3 +178,60 @@
         </div>
     </div>
 </div>
+
+@* Receipt full-view modal *@
+<div class="modal-overlay" id="receiptModal" style="display:none;" onclick="closeReceiptModal(event)">
+    <div class="receipt-modal-box">
+        <img id="receiptModalImg" src="" alt="Receipt" class="receipt-modal-img" />
+        <button class="btn-dismiss receipt-modal-close" onclick="document.getElementById('receiptModal').style.display='none'">
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+    let activeTab = 'all';
+
+    function setTab(status, btn) {
+        activeTab = status;
+        document.querySelectorAll('.res-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('searchInput').value = '';
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows  = document.querySelectorAll('.customer-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const matchTab    = activeTab === 'all' || row.dataset.payment === activeTab;
+            const matchSearch = !query || row.dataset.search.includes(query);
+            const show        = matchTab && matchSearch;
+            row.style.display = show ? 'flex' : 'none';
+            if (show) visible++;
+        });
+
+        document.getElementById('visibleCount').textContent = `(${visible})`;
+        document.getElementById('noResults').style.display  = visible === 0 ? 'block' : 'none';
+    }
+
+    function openReceiptModal(src) {
+        document.getElementById('receiptModalImg').src = src;
+        document.getElementById('receiptModal').style.display = 'flex';
+    }
+
+    function closeReceiptModal(event) {
+        if (event.target.id === 'receiptModal')
+            document.getElementById('receiptModal').style.display = 'none';
+    }
+
+    const toast = document.getElementById('toastMsg');
+    if (toast) {
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+</script>

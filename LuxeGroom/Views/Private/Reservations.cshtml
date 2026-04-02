@@ -3,6 +3,7 @@
  * Admin Reservation Management for LuxeGroom.
  * Lists all reservations with status badges and filter tabs.
  * Updated in Thread 2.7: Added Handle Request modal (Accept / Cancel).
+ * Updated in Thread 3.7: Modal now has editable fields (PetName, PetSize, GroomingStyle, Date) + 50% down payment compute.
  *@
 
 @using LuxeGroom.Data.Generated
@@ -15,7 +16,6 @@
 
 <link rel="stylesheet" href="~/css/private/reservations.css" />
 
-@* Toast notifications for TempData feedback *@
 @if (TempData["Success"] != null)
 {
     <div class="toast toast--success" id="toastMsg">@TempData["Success"]</div>
@@ -46,7 +46,6 @@
                oninput="applyFilters()" />
     </div>
 
-    @* Status filter tabs — includes Approved and Cancelled *@
     <div class="res-tabs">
         <button class="res-tab active" onclick="setTab('all', this)">All</button>
         <button class="res-tab" onclick="setTab('Pending', this)">Pending</button>
@@ -94,6 +93,10 @@
                                     @r.GroomingStyle
                                 </span>
                                 <span>
+                                    <span class="material-symbols-outlined">pets</span>
+                                    @r.PetSize
+                                </span>
+                                <span>
                                     <span class="material-symbols-outlined">call</span>
                                     @r.Phone
                                 </span>
@@ -111,15 +114,20 @@
                             <p class="res-id">@r.Id</p>
                         </div>
 
-                        @* Badge + Handle Request button *@
                         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
                             <span class="status-badge @badgeClass">@r.Status</span>
 
-                            @* Handle Request only shown for Pending reservations *@
                             @if (r.Status == "Pending")
                             {
                                 <button class="btn-handle"
-                                        onclick="openHandleModal('@r.Id', '@r.OwnerName', '@r.PetName')">
+                                        onclick="openHandleModal(
+                                                        '@r.Id',
+                                                        '@Html.Raw(r.OwnerName.Replace("'", "\\'"))',
+                                                        '@Html.Raw(r.PetName.Replace("'", "\\'"))',
+                                                        '@r.PetSize',
+                                                        '@Html.Raw(r.GroomingStyle.Replace("'", "\\'"))',
+                                                        '@r.ReservationDate.ToString("yyyy-MM-dd")'
+                                                    )">
                                     <span class="material-symbols-outlined">assignment</span>
                                     Handle Request
                                 </button>
@@ -151,77 +159,121 @@
         </div>
 
         <div class="modal-body">
-            <p class="modal-desc">Choose an action for this reservation:</p>
+            <p class="modal-desc">Review and edit reservation details before accepting:</p>
+
+            @* Read-only owner info *@
             <div class="modal-info-card">
                 <p class="modal-info-label">Owner</p>
                 <p class="modal-info-value" id="modalOwner">—</p>
-                <p class="modal-info-label" style="margin-top:10px;">Pet</p>
-                <p class="modal-info-value" id="modalPet">—</p>
             </div>
-        </div>
 
-        @* Accept form *@
-        <form id="acceptForm" method="post" action="/Reservation/HandleAccept">
-            @Html.AntiForgeryToken()
-            <input type="hidden" id="acceptId" name="id" />
-        </form>
+            @* Editable fields — sent to HandleAccept *@
+            <form id="acceptForm" method="post" action="/Reservation/HandleAccept">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="acceptId" name="id" />
 
-        @* Cancel form *@
-        <form id="cancelForm" method="post" action="/Reservation/HandleCancel">
-            @Html.AntiForgeryToken()
-            <input type="hidden" id="cancelId" name="id" />
-        </form>
+                @* Pet Name *@
+                <div class="modal-field-group">
+                    <label class="modal-field-label">Pet Name</label>
+                    <input type="text" id="editPetName" name="petName"
+                           class="modal-field-input" required />
+                </div>
 
-        <div class="modal-actions">
-            <button class="btn-modal btn-accept" onclick="submitAction('accept')">
-                <span class="material-symbols-outlined">check_circle</span>
-                Accept
-            </button>
-            <button class="btn-modal btn-cancel-req" onclick="submitAction('cancel')">
-                <span class="material-symbols-outlined">cancel</span>
-                Cancel Request
-            </button>
-            <button class="btn-modal btn-dismiss" onclick="closeModal()">
-                Dismiss
-            </button>
+                @* Pet Size *@
+                <div class="modal-field-group">
+                    <label class="modal-field-label">Pet Size</label>
+                    <select id="editPetSize" name="petSize"
+                            class="modal-field-input" onchange="computeAmount()">
+                        <option value="Small Dog">Small Dog</option>
+                        <option value="Medium Dog">Medium Dog</option>
+                        <option value="Large Dog">Large Dog</option>
+                    </select>
+                </div>
+
+                @* Grooming Style *@
+                <div class="modal-field-group">
+                    <label class="modal-field-label">Grooming Style</label>
+                    <select id="editGroomingStyle" name="groomingStyle"
+                            class="modal-field-input" onchange="computeAmount()">
+                        <option value="Bath & Brush">Bath &amp; Brush</option>
+                        <option value="Full Groom">Full Groom</option>
+                        <option value="Custom Cut">Custom Cut</option>
+                    </select>
+                </div>
+
+                @* Reservation Date *@
+                <div class="modal-field-group">
+                    <label class="modal-field-label">Reservation Date</label>
+                    <input type="date" id="editDate" name="reservationDate"
+                           class="modal-field-input" required />
+                </div>
+
+                @* Amount Summary *@
+                <div class="modal-amount-summary">
+                    <div class="modal-amount-row">
+                        <span>Total Amount</span>
+                        <span id="totalAmount">₱0</span>
+                    </div>
+                    <div class="modal-amount-row modal-amount-downpayment">
+                        <span>50% Down Payment Due</span>
+                        <span id="downPayment">₱0</span>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="submit" class="btn-modal btn-accept">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Accept
+                    </button>
+                    <button type="button" class="btn-modal btn-cancel-req"
+                            onclick="submitCancel()">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancel Request
+                    </button>
+                    <button type="button" class="btn-modal btn-dismiss" onclick="closeModal()">
+                        Dismiss
+                    </button>
+                </div>
+
+            </form>
         </div>
 
     </div>
 </div>
 
+@* Cancel form — separate, no editable fields needed *@
+<form id="cancelForm" method="post" action="/Reservation/HandleCancel" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="cancelId" name="id" />
+</form>
+
 <script>
+    // ── Pricing table (must match backend) ──
+    const prices = {
+        'Bath & Brush': { 'Small Dog': 300, 'Medium Dog': 600, 'Large Dog': 750 },
+        'Full Groom':   { 'Small Dog': 900, 'Medium Dog': 1000, 'Large Dog': 1250 },
+        'Custom Cut':   { 'Small Dog': 1200, 'Medium Dog': 1300, 'Large Dog': 1500 }
+    };
+
     let activeTab = 'all';
-    let currentReservationId = '';
 
-    function setTab(status, btn) {
-        activeTab = status;
-        document.querySelectorAll('.res-tab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('searchInput').value = '';
-        applyFilters();
+    function computeAmount() {
+        const style = document.getElementById('editGroomingStyle').value;
+        const size  = document.getElementById('editPetSize').value;
+        const total = (prices[style] && prices[style][size]) ? prices[style][size] : 0;
+        const down  = Math.round(total * 0.5);
+        document.getElementById('totalAmount').textContent  = `₱${total.toLocaleString()}`;
+        document.getElementById('downPayment').textContent  = `₱${down.toLocaleString()}`;
     }
 
-    function applyFilters() {
-        const query = document.getElementById('searchInput').value.toLowerCase().trim();
-        const rows = document.querySelectorAll('.res-row');
-        let visible = 0;
-
-        rows.forEach(row => {
-            const matchStatus = activeTab === 'all' || row.dataset.status === activeTab;
-            const matchSearch = !query || row.dataset.search.includes(query);
-            const show = matchStatus && matchSearch;
-            row.style.display = show ? 'flex' : 'none';
-            if (show) visible++;
-        });
-
-        document.getElementById('visibleCount').textContent = `(${visible})`;
-        document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
-    }
-
-    function openHandleModal(id, owner, pet) {
-        currentReservationId = id;
-        document.getElementById('modalOwner').textContent = owner;
-        document.getElementById('modalPet').textContent = pet;
+    function openHandleModal(id, owner, pet, petSize, groomingStyle, date) {
+        document.getElementById('acceptId').value           = id;
+        document.getElementById('modalOwner').textContent   = owner;
+        document.getElementById('editPetName').value        = pet;
+        document.getElementById('editPetSize').value        = petSize;
+        document.getElementById('editGroomingStyle').value  = groomingStyle;
+        document.getElementById('editDate').value           = date;
+        computeAmount();
         document.getElementById('handleModal').style.display = 'flex';
     }
 
@@ -233,17 +285,36 @@
         document.getElementById('handleModal').style.display = 'none';
     }
 
-    function submitAction(action) {
-        if (action === 'accept') {
-            document.getElementById('acceptId').value = currentReservationId;
-            document.getElementById('acceptForm').submit();
-        } else {
-            document.getElementById('cancelId').value = currentReservationId;
-            document.getElementById('cancelForm').submit();
-        }
+    function submitCancel() {
+        document.getElementById('cancelId').value = document.getElementById('acceptId').value;
+        document.getElementById('cancelForm').submit();
     }
 
-    // Auto-hide toast after 3 seconds
+    function setTab(status, btn) {
+        activeTab = status;
+        document.querySelectorAll('.res-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('searchInput').value = '';
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const rows  = document.querySelectorAll('.res-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const matchStatus = activeTab === 'all' || row.dataset.status === activeTab;
+            const matchSearch = !query || row.dataset.search.includes(query);
+            const show = matchStatus && matchSearch;
+            row.style.display = show ? 'flex' : 'none';
+            if (show) visible++;
+        });
+
+        document.getElementById('visibleCount').textContent = `(${visible})`;
+        document.getElementById('noResults').style.display  = visible === 0 ? 'block' : 'none';
+    }
+
     const toast = document.getElementById('toastMsg');
     if (toast) {
         setTimeout(() => {

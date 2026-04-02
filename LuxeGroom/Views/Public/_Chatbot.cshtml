@@ -535,10 +535,10 @@ async function lgOpenContextModal(type) {
                 conversation.push({ role: 'assistant', content: data.message });
                 appendMessage('assistant', data.message);
             } else {
-                appendMessage('assistant', '⚠️ ' + (data.error || 'Something went wrong.'), true);
+                appendMessage('assistant', ' ' + (data.error || 'Something went wrong.'), true);
             }
         } catch (err) {
-            appendMessage('assistant', '⚠️ Could not reach the server. Please try again.', true);
+            appendMessage('assistant', 'Could not reach the server. Please try again.', true);
         } finally {
             setLoading(false);
             inputEl.focus();
