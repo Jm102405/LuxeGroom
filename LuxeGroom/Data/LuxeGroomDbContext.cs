@@ -83,7 +83,8 @@ public partial class LuxeGroomDbContext : DbContext
 
         modelBuilder.Entity<Chatbot>(entity =>
         {
-            entity.ToTable("Chatbot");
+        // chatbot entity
+        entity.ToTable("Chatbot");
             entity.HasKey(e => e.Id);  // PRIMARY KEY
             entity.Property(e => e.Instructions)
                 .HasMaxLength(500)
@@ -95,7 +96,7 @@ public partial class LuxeGroomDbContext : DbContext
                 .HasDefaultValueSql("GETDATE()");
         });
 
-        // Hook for additional partial model configuration
+
         OnModelCreatingPartial(modelBuilder);
     }
 
