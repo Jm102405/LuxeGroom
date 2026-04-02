@@ -35,6 +35,9 @@ public partial class LuxeGroomDbContext : DbContext
     // DbSet for the Payments table — NEW (Thread 3.7)
     public virtual DbSet<Payment> Payments { get; set; }
 
+    // for the chatbot 
+    public DbSet<Chatbot> Chatbot { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Reservation>(entity =>
@@ -77,6 +80,22 @@ public partial class LuxeGroomDbContext : DbContext
                   .HasForeignKey(e => e.ReservationId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
+
+                modelBuilder.Entity<Chatbot>(entity =>
+        {
+        // chatbot entity
+        entity.ToTable("Chatbot");
+            entity.HasKey(e => e.Id);  // PRIMARY KEY
+            entity.Property(e => e.Instructions)
+                .HasMaxLength(500)
+                .IsRequired();
+            entity.Property(e => e.Data)
+                .HasMaxLength(500)
+                .IsRequired();
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("GETDATE()");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
