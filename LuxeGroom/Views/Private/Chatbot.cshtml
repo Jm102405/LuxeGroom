@@ -1,0 +1,222 @@
+@*
+ * Chatbot.cshtml - Complete dual-column AI interface with Save modal
+ * Left: Instructions | Right: Data | Preview → Save workflow
+ * Updated: Loads Instructions and Data from the [Chatbot] table on GET.
+ *          Saves changes back to the database on POST.
+ *          No OpenAI calls are made here.
+ *@
+
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewData["Title"] = "Chatbot";
+
+    var chatbotModel  = ViewBag.ChatbotModel as LuxeGroom.Data.Generated.Chatbot;
+    var savedResponse = ViewBag.Success as string;
+    var errorMessage  = ViewBag.Error as string;
+}
+
+<div class="dashboard-header">
+    <h1 class="welcome-title">AI Chatbot<span class="username"> Assistant</span></h1>
+    <p class="welcome-subtitle">Instructions on left, data on right. Preview before saving AI response.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert-banner alert-error">⚠️ @errorMessage</div>
+}
+@if (!string.IsNullOrEmpty(savedResponse))
+{
+    <div class="alert-banner alert-success">✓ @savedResponse</div>
+}
+
+<div class="chatbot-section">
+    <form id="chatbotForm" class="chatbot-form" method="post" action="/Chatbot/Chatbot">
+        @Html.AntiForgeryToken()
+
+        <div class="form-row">
+            <!-- Left: Instructions -->
+            <div class="form-group">
+                <label class="form-label">Instructions/Prompt</label>
+                <textarea name="instructions" class="form-textarea"
+                          placeholder="e.g., 'Summarize grooming trends', 'Analyze customer patterns'..."
+                          rows="10" required maxlength="500">@(chatbotModel?.Instructions)</textarea>
+            </div>
+
+            <!-- Right: Data -->
+            <div class="form-group">
+                <label class="form-label">Data/Input</label>
+                <textarea name="data" class="form-textarea"
+                          placeholder="Paste reservations, customer data, reports (CSV/JSON/text)..."
+                          rows="10" required maxlength="500">@(chatbotModel?.Data)</textarea>
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="previewResponse()">
+            <span class="material-symbols-outlined">smart_toy</span>
+            Preview & Save
+        </button>
+    </form>
+</div>
+
+<!-- Save Review Modal -->
+<div class="modal-overlay" id="saveModal" style="display:none;">
+    <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-header">
+            <span class="material-symbols-outlined modal-icon">preview</span>
+            <h3 class="modal-title">Review AI Response</h3>
+        </div>
+        <div class="modal-body">
+            <div class="preview-section">
+                <div class="preview-item">
+                    <span class="preview-label">Instructions:</span>
+                    <span class="preview-value" id="previewInstructions"></span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Data Preview:</span>
+                    <span class="preview-value" id="previewDataSnippet"></span>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Action:</span>
+                    <div class="preview-response" id="previewResponse"></div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal btn-accept" onclick="saveChatbot()">
+                <span class="material-symbols-outlined">save</span>
+                Save & Process
+            </button>
+            <button class="btn-modal btn-dismiss" onclick="closeSaveModal()">
+                <span class="material-symbols-outlined">close</span>
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dual-column layout - ESCAPED media */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 20px;
+    }
+    @@media (max-width: 768px) { 
+        .form-row { grid-template-columns: 1fr; gap: 16px; } 
+    }
+
+    /* Alert banners */
+    .alert-banner {
+        padding: 12px 20px; border-radius: 10px; margin-bottom: 20px;
+        font-size: 14px; font-weight: 600; max-width: 1200px; margin-left: auto; margin-right: auto;
+    }
+    .alert-success { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
+    .alert-error   { background: rgba(239,68,68,0.12);  border: 1px solid rgba(239,68,68,0.3);  color: #f87171; }
+
+    /* Form elements */
+    .chatbot-section { max-width: 1200px; margin: 0 auto; }
+    .chatbot-form {
+        background: #161925; padding: 32px; border-radius: 12px; 
+        border: 1px solid rgba(255,255,255,0.1); 
+    }
+    .form-group { margin-bottom: 0; }
+    .form-label { 
+        display: block; font-size: 14px; font-weight: 600; color: #e5e7eb; 
+        margin-bottom: 8px;
+    }
+    .form-textarea {
+        width: 100%; height: 320px; padding: 16px; background: #1a1f2e; 
+        border: 1px solid #2d3748; border-radius: 12px; color: #e5e7eb; 
+        font-size: 14px; font-family: 'Courier New', monospace; resize: vertical; 
+        transition: all 0.3s;
+    }
+    .form-textarea:focus { 
+        outline: none; border-color: #1132d4; box-shadow: 0 0 0 3px rgba(17,50,212,0.1); 
+    }
+    .form-textarea::placeholder { color: #64748b; }
+    .btn-submit {
+        width: 100%; padding: 18px; background: linear-gradient(135deg, #1132d4, #1e40af); 
+        color: white; border: none; border-radius: 12px; font-size: 16px; 
+        font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; 
+        align-items: center; justify-content: center; gap: 10px;
+    }
+    .btn-submit:hover { 
+        transform: translateY(-2px); box-shadow: 0 12px 30px rgba(17,50,212,0.4); 
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.65); 
+        display: flex; align-items: center; justify-content: center; z-index: 1000;
+        backdrop-filter: blur(3px);
+    }
+    .modal-box {
+        background: #111827; border: 1px solid #1e2d40; border-radius: 14px; 
+        padding: 32px; width: 100%; max-width: 600px; 
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+        animation: modalIn 0.2s ease;
+    }
+    @@keyframes modalIn { 
+        from { opacity: 0; transform: translateY(12px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    .modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .modal-icon { font-size: 24px; color: #6b8cff; }
+    .modal-title { font-size: 18px; font-weight: 700; color: #e5e7eb; margin: 0; }
+    .preview-section { background: #1a1f2e; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    .preview-item { display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start; }
+    .preview-label { font-weight: 600; color: #94a3b8; min-width: 100px; font-size: 13px; }
+    .preview-value { flex: 1; color: #e5e7eb; font-size: 14px; }
+    .preview-response { 
+        background: #0f111a; padding: 16px; border-radius: 8px; font-size: 14px; 
+        max-height: 200px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5;
+        color: #e5e7eb;
+    }
+    .modal-actions { display: flex; gap: 12px; }
+    .btn-modal {
+        flex: 1; padding: 12px 16px; border-radius: 8px; font-size: 14px; 
+        font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; 
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-accept { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+    .btn-accept:hover { background: #22c55e; color: white; }
+    .btn-dismiss { background: #1a1f2e; color: #64748b; border: 1px solid #2d3748; }
+    .btn-dismiss:hover { border-color: #4b5563; color: #e5e7eb; }
+</style>
+
+<script>
+    function previewResponse() {
+        const instructions = document.querySelector('[name="instructions"]').value.trim();
+        const data = document.querySelector('[name="data"]').value.trim();
+        
+        if (!instructions || !data) {
+            alert('Please fill both Instructions and Data fields.');
+            return;
+        }
+
+        document.getElementById('previewInstructions').textContent =
+            instructions.length > 200 ? instructions.substring(0, 200) + '…' : instructions;
+
+        document.getElementById('previewDataSnippet').textContent =
+            data.length > 150 ? data.substring(0, 150) + '…' : data;
+
+        document.getElementById('previewResponse').textContent =
+            'This will save the Instructions and Data to the database.';
+
+        document.getElementById('saveModal').style.display = 'flex';
+    }
+
+    function saveChatbot() {
+        document.getElementById('chatbotForm').submit();
+    }
+
+    function closeSaveModal() {
+        document.getElementById('saveModal').style.display = 'none';
+    }
+
+    // Close modal on overlay click
+    document.getElementById('saveModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSaveModal();
+    });
+</script>

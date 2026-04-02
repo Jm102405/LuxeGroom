@@ -81,7 +81,7 @@ public partial class LuxeGroomDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-                modelBuilder.Entity<Chatbot>(entity =>
+        modelBuilder.Entity<Chatbot>(entity =>
         {
         // chatbot entity
         entity.ToTable("Chatbot");
