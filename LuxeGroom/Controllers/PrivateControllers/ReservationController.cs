@@ -1,20 +1,18 @@
 ﻿/*
  * ReservationController.cs
  * Handles Admin Reservation Management for LuxeGroom.
- * Lists reservations and processes Handle Request (Accept / Cancel).
  * Updated in Thread 2.7: password hashing, ManagedBy, Gmail uniqueness check,
  * customer welcome email, and staying on Reservations page after Accept.
- * Updated in Thread 2.8: When accepting a reservation, also creates a User account
- * in the Users table using the same pattern as UserController.AddUser.
- * For Customer role, UserId uses CUST-X (CUST-1, CUST-2, ...) instead of USER/USR.
+ * Updated in Thread 2.8: Creates User account (CUST-X) when accepting.
+ * Updated in Thread 3.7: HandleAccept accepts edited fields from modal + computes
+ * 50% down payment + auto-creates Payment record (status: Unpaid).
  */
 
-using LuxeGroom.Data;                 // DbContext
-using LuxeGroom.Data.Generated;       // Entities (Reservation, Customer, User)
-using Microsoft.AspNetCore.Mvc;       // MVC basics
-using System.Net;                     // NetworkCredential
-using System.Net.Mail;                // SmtpClient, MailMessage
-using BCrypt.Net;                     // BCrypt password hashing
+using LuxeGroom.Data;
+using LuxeGroom.Data.Generated;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Net.Mail;
 
 namespace LuxeGroom.Controllers.PrivateControllers
 {
@@ -29,17 +27,22 @@ namespace LuxeGroom.Controllers.PrivateControllers
             _configuration = configuration;
         }
 
-        // Common session guard for private pages
         private IActionResult? GuardSession()
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("Username")))
-                return RedirectToAction("Login", "Account");
-
+                return RedirectToAction("Index", "Login");
             return null;
         }
 
+        // ── Pricing table (must match frontend JS) ──
+        private static readonly Dictionary<string, Dictionary<string, int>> Prices = new()
+        {
+            ["Bath & Brush"] = new() { ["Small Dog"] = 300, ["Medium Dog"] = 600, ["Large Dog"] = 750 },
+            ["Full Groom"] = new() { ["Small Dog"] = 900, ["Medium Dog"] = 1000, ["Large Dog"] = 1250 },
+            ["Custom Cut"] = new() { ["Small Dog"] = 1200, ["Medium Dog"] = 1300, ["Large Dog"] = 1500 }
+        };
+
         // GET: /Reservation/Reservations
-        // Lists all reservations for the admin/staff UI
         public IActionResult Reservations()
         {
             var guard = GuardSession();
@@ -56,20 +59,19 @@ namespace LuxeGroom.Controllers.PrivateControllers
         }
 
         // POST: /Reservation/HandleAccept
-        // Accepts a Pending reservation:
-        // - Creates a Customer record (CUST-X)
-        // - Creates a User record in Users table (UserId = CUST-X, Role = Customer)
-        // - Marks reservation as Approved
-        // - Sends welcome email with username + temp password
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult HandleAccept(string id)
+        public IActionResult HandleAccept(
+            string id,
+            string petName,
+            string petSize,
+            string groomingStyle,
+            DateTime reservationDate)
         {
-            // 1) Enforce login via session
             var guard = GuardSession();
             if (guard != null) return guard;
 
-            // 2) Load reservation being handled
+            // 1) Load reservation
             var reservation = _context.Reservations.FirstOrDefault(r => r.Id == id);
             if (reservation == null)
             {
@@ -77,21 +79,19 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 return RedirectToAction("Reservations");
             }
 
-            // 3) Gmail uniqueness check against Users table (same idea as UserController)
+            // 2) Gmail uniqueness check
             var normalizedEmail = (reservation.Email ?? string.Empty).Trim().ToLower();
-
             var emailInUsers = _context.Users
                 .AsEnumerable()
-                .Any(u => ((u.Gmail ?? string.Empty).Trim().ToLower()) == normalizedEmail);
+                .Any(u => (u.Gmail ?? string.Empty).Trim().ToLower() == normalizedEmail);
 
             if (emailInUsers)
             {
-                TempData["Error"] =
-                    "This email already exists in the Users list. Please use a different email or check existing account.";
+                TempData["Error"] = "This email already exists in the Users list.";
                 return RedirectToAction("Reservations");
             }
 
-            // 4) Compute next CUST-X value based on existing customers
+            // 3) Compute next CUST-X
             var maxCustNum = _context.Customers
                 .AsEnumerable()
                 .Where(c => c.CustomerId != null && c.CustomerId.StartsWith("CUST-"))
@@ -105,24 +105,20 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
             var newCustomerId = $"CUST-{maxCustNum + 1}";
 
-            // 5) Determine ManagedBy — prefer UserId, fallback to Username, else "Unknown"
+            // 4) ManagedBy
             var managedBy = HttpContext.Session.GetString("UserId")
                           ?? HttpContext.Session.GetString("Username")
                           ?? "Unknown";
 
-            // 6) Generate temporary password and hash using BCrypt
+            // 5) Generate temp password
             var plainPassword = GenerateTempPassword();
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(plainPassword);
 
-            // 7) Build base username from owner name
+            // 6) Build unique username
             var baseUsername = (reservation.OwnerName ?? "customer")
-                .Replace(" ", "")
-                .ToLower();
+                .Replace(" ", "").ToLower();
+            if (string.IsNullOrWhiteSpace(baseUsername)) baseUsername = "customer";
 
-            if (string.IsNullOrWhiteSpace(baseUsername))
-                baseUsername = "customer";
-
-            // Ensure username is unique in Users table (append number if needed)
             var finalUsername = baseUsername;
             int counter = 1;
             while (_context.Users.Any(u => u.Username == finalUsername))
@@ -131,7 +127,23 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 counter++;
             }
 
-            // 8) Build Customer entity from reservation data
+            // 7) Compute amount + 50% down payment
+            int totalAmount = 0;
+            if (Prices.TryGetValue(groomingStyle, out var sizeMap) &&
+                sizeMap.TryGetValue(petSize, out var price))
+            {
+                totalAmount = price;
+            }
+            decimal downPayment = Math.Round(totalAmount * 0.5m, 2);
+
+            // 8) Update reservation with edited fields
+            reservation.PetName = petName;
+            reservation.PetSize = petSize;
+            reservation.GroomingStyle = groomingStyle;
+            reservation.ReservationDate = reservationDate;
+            reservation.Status = "Approved";
+
+            // 9) Create Customer record
             var customer = new Customer
             {
                 CustomerId = newCustomerId,
@@ -139,16 +151,15 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 Email = reservation.Email,
                 Phone = reservation.Phone,
                 Username = finalUsername,
-                Password = hashedPassword, // store only the hash
-                ManagedBy = managedBy      // store staff/admin ID or Username
+                Password = hashedPassword,
+                ManagedBy = managedBy,
+                DateCreated = DateTime.Now
             };
 
-            // 9) Build User entity for Users table
-            // For Customers: UserId must also be CUST-X (same number series as CustomerId).
-            // So we reuse newCustomerId as the UserId.
+            // 10) Create User record
             var user = new User
             {
-                UserId = newCustomerId,                 // <── CUST-X instead of USER/USR
+                UserId = newCustomerId,
                 Username = finalUsername,
                 PasswordHash = hashedPassword,
                 Gmail = reservation.Email,
@@ -160,30 +171,42 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 ResetCodeExpiry = null
             };
 
-            // 10) Save new customer + new user and update reservation status
+            // 11) Auto-create Payment record — status: Unpaid, amount = 50% down
+            var payment = new Payment
+            {
+                ReservationId = reservation.Id,
+                AmountDue = downPayment,
+                ReferenceNumber = null,
+                ReceiptImage = null,
+                Status = "Unpaid",
+                PaidAt = null
+            };
+
             _context.Customers.Add(customer);
             _context.Users.Add(user);
-            reservation.Status = "Approved"; // keep reservation for history
+            _context.Payments.Add(payment);
             _context.SaveChanges();
 
-            // 11) Send welcome email to the customer with username + temporary password
+            // 12) Send welcome email
             try
             {
-                SendCustomerWelcomeEmail(reservation.Email, finalUsername, plainPassword);
+                SendCustomerWelcomeEmail(
+                    reservation.Email,
+                    finalUsername,
+                    plainPassword,
+                    groomingStyle,
+                    petSize,
+                    totalAmount,
+                    (int)downPayment);
             }
-            catch
-            {
-                // TODO: log error if you add logging later
-            }
+            catch { }
 
-            // 12) Show toast and reload Reservations page
             TempData["Success"] =
-                $"Reservation approved. Customer {newCustomerId} has been created and linked to Users table.";
+                $"Reservation approved. Customer {newCustomerId} created. Down payment due: ₱{downPayment:N0}.";
             return RedirectToAction("Reservations");
         }
 
         // POST: /Reservation/HandleCancel
-        // Cancels a reservation (Status = Cancelled, no delete)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult HandleCancel(string id)
@@ -198,14 +221,15 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 return RedirectToAction("Reservations");
             }
 
-            reservation.Status = "Cancelled"; // keep record, just mark as cancelled
+            reservation.Status = "Cancelled";
             _context.SaveChanges();
 
             TempData["Success"] = "Reservation has been cancelled and kept for records.";
             return RedirectToAction("Reservations");
         }
 
-        // Generates a random 10-character temporary password
+        // ─── HELPERS ─────────────────────────────────────────────────────────────
+
         private static string GenerateTempPassword()
         {
             const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -215,7 +239,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             const string all = upper + lower + digits + special;
 
             var rng = new Random();
-
             var chars = new List<char>
             {
                 upper[rng.Next(upper.Length)],
@@ -230,8 +253,14 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return new string(chars.OrderBy(_ => rng.Next()).ToArray());
         }
 
-        // Sends a welcome email to the new customer with username + temporary password
-        private void SendCustomerWelcomeEmail(string toEmail, string username, string tempPassword)
+        private void SendCustomerWelcomeEmail(
+            string toEmail,
+            string username,
+            string tempPassword,
+            string groomingStyle,
+            string petSize,
+            int totalAmount,
+            int downPayment)
         {
             string smtpHost = _configuration["EmailSettings:SmtpHost"] ?? "";
             int smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
@@ -248,19 +277,25 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
 Your LuxeGroom reservation has been approved and your account is now ready.
 
-You can use the following credentials to access your customer portal:
+Reservation Details:
+  Grooming Style : {groomingStyle}
+  Pet Size       : {petSize}
+  Total Amount   : ₱{totalAmount:N0}
+  Down Payment   : ₱{downPayment:N0} (50% due before grooming)
 
-Username: {username}
-Temporary Password: {tempPassword}
+Your login credentials:
+  Username          : {username}
+  Temporary Password: {tempPassword}
 
-Please login and change your password immediately after signing in.
+Please log in to your Customer Portal and complete your down payment.
+Change your password immediately after signing in.
 
 — LuxeGroom Team";
 
             MailMessage mail = new MailMessage
             {
                 From = new MailAddress(senderEmail, "LuxeGroom"),
-                Subject = "Your LuxeGroom Account Details",
+                Subject = "Your LuxeGroom Reservation is Approved",
                 Body = body,
                 IsBodyHtml = false
             };

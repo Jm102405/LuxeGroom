@@ -1,10 +1,33 @@
 ﻿/*
  * customers.css
  * Styles for Customer Management page in LuxeGroom.
- * Matches the private dashboard look & feel.
+ * Updated in Thread 3.7: Added payment info, receipt preview, filter tabs,
+ * approve button, toast, and receipt modal styles.
  */
 
-/* Scrollable wrapper for the list */
+/* ── ACTIVITY SECTION ── */
+
+.activity-section {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    overflow: hidden;
+}
+
+/* ── SECTION HEADER ── */
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #2d3748;
+    flex-shrink: 0;
+}
+
+/* ── SCROLL WRAPPER ── */
+
 .list-scroll-wrapper {
     overflow-y: auto;
     flex: 1;
@@ -27,7 +50,78 @@
             background: #4b5563;
         }
 
-/* Counter beside Customer List title */
+/* ── SEARCH BAR ── */
+
+.search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 42px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #e5e7eb;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+    .search-input:focus {
+        border-color: #3b82f6;
+    }
+
+    .search-input::placeholder {
+        color: #4b5563;
+    }
+
+/* ── FILTER TABS ── */
+
+.res-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.res-tab {
+    padding: 8px 16px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .res-tab:hover {
+        border-color: #4b5563;
+        color: #e5e7eb;
+    }
+
+    .res-tab.active {
+        background: #1132d4;
+        border-color: #1132d4;
+        color: #ffffff;
+    }
+
+/* ── COUNTER ── */
+
 .cust-count {
     font-size: 14px;
     color: #64748b;
@@ -35,7 +129,8 @@
     margin-left: 6px;
 }
 
-/* Layout of a single customer row */
+/* ── CUSTOMER ROW ── */
+
 .customer-row {
     display: flex;
     align-items: flex-start;
@@ -43,55 +138,273 @@
     gap: 16px;
 }
 
-/* Email + phone line */
 .cust-meta {
     font-size: 13px;
     color: #9ca3af;
     margin-top: 4px;
 }
 
-/* Pet + grooming style line */
 .cust-pet {
     font-size: 13px;
     color: #e5e7eb;
     margin-top: 6px;
 }
 
-/* Last schedule date line */
 .cust-date {
     font-size: 12px;
     color: #6b7280;
     margin-top: 4px;
 }
 
-/* Right-side (ID, ManagedBy, button) */
+/* ── RIGHT SIDE (ID, ManagedBy, Badge, Button) ── */
+
 .customer-side {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 6px;
+    flex-shrink: 0;
 }
 
-/* Customer ID text */
 .cust-id {
     font-size: 11px;
     color: #6b7280;
 }
 
-/* ManagedBy (User/Admin ID) */
 .cust-managedby {
     font-size: 12px;
     color: #9ca3af;
 }
 
-/* View Profile chip button */
-.cust-view-btn {
-    cursor: pointer;
-    background: #1132d4;
-    color: #ffffff;
-    border-radius: 999px;
-    padding: 6px 14px;
+/* ── STATUS BADGE ── */
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.badge--confirmed {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.badge--pending {
+    background: rgba(255, 193, 7, 0.15);
+    color: #FFC107;
+}
+
+.badge--cancelled {
+    background: rgba(107, 114, 128, 0.15);
+    color: #6b7280;
+}
+
+/* ── PAYMENT INFO ROW ── */
+
+.cust-payment-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+}
+
+.cust-payment-label {
     font-size: 12px;
-    border: none;
+    color: #64748b;
+}
+
+.cust-payment-amount {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e5e7eb;
+}
+
+.cust-payment-ref {
+    font-size: 12px;
+    color: #6b8cff;
+}
+
+.cust-payment-paidat {
+    font-size: 12px;
+    color: #22c55e;
+}
+
+.cust-payment-approver {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* ── RECEIPT PREVIEW ── */
+
+.cust-receipt-wrapper {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cust-receipt-label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.cust-receipt-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #2d3748;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+    .cust-receipt-thumb:hover {
+        opacity: 0.8;
+    }
+
+/* ── APPROVE PAYMENT BUTTON ── */
+
+.btn-approve-payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    color: #22c55e;
+    font-size: 12px;
     font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+    .btn-approve-payment:hover {
+        background: #22c55e;
+        color: #0a1a10;
+        border-color: #22c55e;
+    }
+
+    .btn-approve-payment .material-symbols-outlined {
+        font-size: 14px;
+    }
+
+/* ── EMPTY / NO RESULTS ── */
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ── RECEIPT FULL-VIEW MODAL ── */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.receipt-modal-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: #111827;
+    border: 1px solid #1e2d40;
+    border-radius: 14px;
+    max-width: 90vw;
+    max-height: 90vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalIn 0.2s ease;
+}
+
+.receipt-modal-img {
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: 10px;
+    object-fit: contain;
+}
+
+.receipt-modal-close {
+    padding: 9px 24px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #9ca3af;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .receipt-modal-close:hover {
+        border-color: #4b5563;
+        color: #e5e7eb;
+    }
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── TOAST NOTIFICATION ── */
+
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 2000;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    max-width: 340px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transition: opacity 0.4s ease;
+    opacity: 1;
+}
+
+.toast--success {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.toast--error {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
 }

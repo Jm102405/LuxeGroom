@@ -1,6 +1,7 @@
 ﻿/*
  * LoginController.cs
  * Handles Login and Logout for LuxeGroom.
+ * Updated in Thread 3.7: Added role-based redirect after login.
  */
 
 using LuxeGroom.Data;
@@ -13,7 +14,6 @@ namespace LuxeGroom.Controllers.Auth
     {
         private readonly LuxeGroomDbContext _context;
 
-        // Inject the database context
         public LoginController(LuxeGroomDbContext context)
         {
             _context = context;
@@ -30,50 +30,49 @@ namespace LuxeGroom.Controllers.Auth
         [ValidateAntiForgeryToken]
         public IActionResult Index(LoginViewModel model)
         {
-            // Return error if username field is empty
             if (string.IsNullOrWhiteSpace(model.Username))
             {
                 ViewBag.ErrorMessage = "Please fill in the required field.";
                 return View("~/Views/Auth/Login.cshtml", model);
             }
 
-            // Return error if password field is empty
             if (string.IsNullOrWhiteSpace(model.Password))
             {
                 ViewBag.ErrorMessage = "Please fill in the required field.";
                 return View("~/Views/Auth/Login.cshtml", model);
             }
 
-            // Look up user by username
             var user = _context.Users
                 .FirstOrDefault(u => u.Username == model.Username);
 
-            // Return error if no matching user found
             if (user == null)
             {
                 ViewBag.ErrorMessage = "Invalid username or password.";
                 return View("~/Views/Auth/Login.cshtml", model);
             }
 
-            // Block login if the account is deactivated
             if (user.Status == "Inactive")
             {
                 ViewBag.ErrorMessage = "Your account has been deactivated. Please contact your administrator.";
                 return View("~/Views/Auth/Login.cshtml", model);
             }
 
-            // Verify submitted password against the stored BCrypt hash
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash);
 
             if (isPasswordValid)
             {
-                // Store username and role in session on successful login
+                // Store session data
                 HttpContext.Session.SetString("Username", user.Username);
                 HttpContext.Session.SetString("Role", user.Role);
+
+                // Role-based redirect
+                if (user.Role == "Customer")
+                    return RedirectToAction("Index", "CustomerPortal");
+
+                // Admin and User (Staff) go to Dashboard
                 return RedirectToAction("Dashboard", "Dashboard");
             }
 
-            // Return error if password does not match
             ViewBag.ErrorMessage = "Invalid username or password.";
             return View("~/Views/Auth/Login.cshtml", model);
         }

@@ -3,6 +3,7 @@
  * Handles all User Management operations for LuxeGroom.
  * Merged from UsersController.cs and UserFormController.cs.
  * Covers listing, add, edit, deactivate, and activate actions.
+ * Updated in Thread 3.7: CheckEmail now returns isCustomer flag for role-based message.
  */
 
 using LuxeGroom.Data;
@@ -18,7 +19,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
         private readonly LuxeGroomDbContext _context;
         private readonly IConfiguration _configuration;
 
-        // Inject the database context and app configuration
         public UserController(LuxeGroomDbContext context, IConfiguration configuration)
         {
             _context = context;
@@ -27,7 +27,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
         // ─── USERS LIST ───────────────────────────────────────────────────────────
 
-        // GET — load all users split into Active and Inactive lists
         public IActionResult Users()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -51,7 +50,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
         // ─── ADD USER ─────────────────────────────────────────────────────────────
 
-        // GET — validate session and render the Add User form
         public IActionResult AddUser()
         {
             var username = HttpContext.Session.GetString("Username");
@@ -67,7 +65,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return View("/Views/Private/User.cshtml");
         }
 
-        // POST — validate, create user, send welcome email
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddUser(UserViewModel model)
@@ -104,8 +101,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
                     return View("/Views/Private/User.cshtml", model);
                 }
 
-                // Generate a collision-safe UserID by finding the highest existing
-                // number for this role prefix, then incrementing it
                 string prefix = model.Role == "Admin" ? "ADM" : "USR";
                 var existingIds = _context.Users
                     .Where(u => u.Role == model.Role)
@@ -147,7 +142,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             }
             catch (Exception ex)
             {
-                // Surface the inner exception message for easier debugging
                 ViewBag.ErrorMessage = "Error: " + (ex.InnerException?.Message ?? ex.Message);
                 return View("/Views/Private/User.cshtml", model);
             }
@@ -155,7 +149,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
         // ─── EDIT USER ────────────────────────────────────────────────────────────
 
-        // GET — load user by ID and render the Edit User form
         public IActionResult EditUser(string id)
         {
             var username = HttpContext.Session.GetString("Username");
@@ -185,7 +178,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return View("/Views/Private/User.cshtml", model);
         }
 
-        // POST — validate and save updated user details
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditUser(UserViewModel model)
@@ -230,7 +222,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 user.Gmail = model.Gmail;
                 user.PhoneNumber = model.PhoneNumber ?? "";
                 user.Role = model.Role;
-                // Do NOT overwrite Status — managed by Activate/Deactivate only
 
                 _context.SaveChanges();
 
@@ -238,7 +229,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             }
             catch (Exception ex)
             {
-                // Surface the inner exception message for easier debugging
                 ViewBag.ErrorMessage = "Error: " + (ex.InnerException?.Message ?? ex.Message);
                 return View("/Views/Private/User.cshtml", model);
             }
@@ -246,7 +236,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
         // ─── STATUS ACTIONS ───────────────────────────────────────────────────────
 
-        // GET — soft-delete a user by setting their status to Inactive
         public IActionResult DeleteUser(string id)
         {
             var username = HttpContext.Session.GetString("Username");
@@ -265,7 +254,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return RedirectToAction("Users");
         }
 
-        // GET — restore a user by setting their status back to Active
         public IActionResult ActivateUser(string id)
         {
             var username = HttpContext.Session.GetString("Username");
@@ -286,7 +274,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
 
         // ─── HELPERS ──────────────────────────────────────────────────────────────
 
-        // Generate a random 8-character password with upper, lower, digit, and special chars
         private string GenerateTemporaryPassword()
         {
             const string upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -311,7 +298,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return new string(chars.OrderBy(_ => rng.Next()).ToArray());
         }
 
-        // Send a welcome email with the temporary password via Gmail SMTP
         private void SendWelcomeEmail(string toEmail, string username, string tempPassword)
         {
             string smtpHost = _configuration["EmailSettings:SmtpHost"] ?? "";
@@ -349,20 +335,23 @@ Please login and change your password immediately.
         // ─── EMAIL CHECK API FOR RESERVATIONS ─────────────────────────────────────
 
         // GET: /User/CheckEmail?email=...
-        // Returns JSON: { exists: true/false } based on Users.Gmail
+        // Updated in Thread 3.7: Returns isCustomer flag for role-based error message.
         [HttpGet]
         public IActionResult CheckEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                return Json(new { exists = false });
+                return Json(new { exists = false, isCustomer = false });
 
             var normalized = email.Trim().ToLower();
 
-            var exists = _context.Users
+            var user = _context.Users
                 .AsEnumerable()
-                .Any(u => ((u.Gmail ?? string.Empty).Trim().ToLower()) == normalized);
+                .FirstOrDefault(u => (u.Gmail ?? string.Empty).Trim().ToLower() == normalized);
 
-            return Json(new { exists });
+            if (user == null)
+                return Json(new { exists = false, isCustomer = false });
+
+            return Json(new { exists = true, isCustomer = user.Role == "Customer" });
         }
     }
 }

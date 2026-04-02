@@ -1,0 +1,239 @@
+﻿@*
+ * Payment.cshtml
+ * Customer Portal — Payment page.
+ * Updated in Thread 3.7: Shows reservation summary, amount due, GCash QR,
+ * reference number input, receipt upload form, and payment status.
+ *@
+
+@model LuxeGroom.Models.CustomerPaymentViewModel
+
+@{
+    Layout = "~/Views/Private/CustomerPortal/_Layout.cshtml";
+    ViewBag.Title = "Payment";
+}
+
+<link rel="stylesheet" href="~/css/private/customerportal/payment.css" />
+
+@if (TempData["Success"] != null)
+{
+    <div class="toast toast--success" id="toastMsg">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="toast toast--error" id="toastMsg">@TempData["Error"]</div>
+}
+
+<div class="page-header">
+    <h1 class="page-title">Payment</h1>
+    <p class="page-subtitle">Settle your reservation down payment here.</p>
+</div>
+
+@if (Model == null)
+{
+    <div class="portal-card empty-payment">
+        <span class="material-symbols-outlined empty-icon">receipt_long</span>
+        <p class="empty-text">No pending payments at this time.</p>
+    </div>
+}
+else
+{
+    @* ── Reservation Summary Card ── *@
+    <div class="portal-card payment-summary-card">
+        <div class="payment-summary-header">
+            <span class="material-symbols-outlined">pets</span>
+            <h3>Reservation Details</h3>
+        </div>
+        <div class="payment-summary-grid">
+            <div class="payment-summary-item">
+                <span class="summary-label">Pet Name</span>
+                <span class="summary-value">@Model.PetName</span>
+            </div>
+            <div class="payment-summary-item">
+                <span class="summary-label">Pet Size</span>
+                <span class="summary-value">@Model.PetSize</span>
+            </div>
+            <div class="payment-summary-item">
+                <span class="summary-label">Grooming Style</span>
+                <span class="summary-value">@Model.GroomingStyle</span>
+            </div>
+            <div class="payment-summary-item">
+                <span class="summary-label">Schedule</span>
+                <span class="summary-value">@Model.ReservationDate.ToString("MMMM dd, yyyy")</span>
+            </div>
+        </div>
+
+        @* Amount Due highlight *@
+        <div class="payment-amount-box">
+            <span class="payment-amount-label">50% Down Payment Due</span>
+            <span class="payment-amount-value">₱@Model.AmountDue.ToString("N0")</span>
+        </div>
+    </div>
+
+    @* ── Status Badge ── *@
+    <div class="portal-card payment-status-card">
+        <span class="payment-status-label">Payment Status:</span>
+        <span class="payment-status-badge
+                @(Model.Status == "Paid" ? "badge--confirmed" :
+                            Model.Status == "Pending Review" ? "badge--pending" : "badge--unpaid")">
+        @Model.Status
+    </span>
+
+    @if (Model.Status == "Paid" && Model.PaidAt.HasValue)
+        {
+            <span class="payment-paidat">
+                Confirmed on @Model.PaidAt.Value.ToString("MMMM dd, yyyy h:mm tt")
+            </span>
+        }
+    </div>
+
+    @* ── Upload Form — only if Unpaid ── *@
+    @if (Model.Status == "Unpaid")
+    {
+        <div class="portal-card payment-upload-card">
+
+            <div class="payment-gcash-section">
+                <div class="payment-gcash-header">
+                    <span class="material-symbols-outlined">qr_code_2</span>
+                    <h3>Pay via GCash</h3>
+                </div>
+                <p class="payment-gcash-note">
+                    Scan the QR code below and send exactly
+                    <strong>₱@Model.AmountDue.ToString("N0")</strong>.
+                    Then upload your screenshot as proof of payment.
+                </p>
+                @* GCash QR placeholder — replace src with actual QR image *@
+                <div class="payment-qr-wrapper">
+                    <img src="~/images/gcash-qr.png"
+                         alt="GCash QR Code"
+                         class="payment-qr-img"
+                         onerror="this.style.display='none';document.getElementById('qrFallback').style.display='flex'" />
+                    <div class="payment-qr-fallback" id="qrFallback" style="display:none;">
+                        <span class="material-symbols-outlined">qr_code_2</span>
+                        <p>QR Code not set yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post"
+                  action="/CustomerPortal/UploadPayment"
+                  enctype="multipart/form-data"
+                  class="payment-upload-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="paymentId" value="@Model.PaymentId" />
+
+                @* Reference Number *@
+                <div class="upload-field-group">
+                    <label class="upload-field-label">GCash Reference Number</label>
+                    <div class="upload-input-wrapper">
+                        <input type="text"
+                               name="referenceNumber"
+                               class="upload-input"
+                               placeholder="e.g. 1234567890"
+                               required />
+                        <span class="material-symbols-outlined upload-input-icon">tag</span>
+                    </div>
+                </div>
+
+                @* Receipt Image Upload *@
+                <div class="upload-field-group">
+                    <label class="upload-field-label">Upload Receipt Screenshot</label>
+                    <div class="upload-dropzone" id="dropzone"
+                         onclick="document.getElementById('receiptFile').click()">
+                        <span class="material-symbols-outlined upload-dropzone-icon">upload_file</span>
+                        <p class="upload-dropzone-text">Click to upload or drag & drop</p>
+                        <p class="upload-dropzone-hint">JPG, PNG, or WEBP</p>
+                        <img id="receiptPreview" src="" alt="Preview"
+                             class="upload-preview" style="display:none;" />
+                    </div>
+                    <input type="file"
+                           id="receiptFile"
+                           name="receiptImage"
+                           accept="image/jpeg,image/png,image/webp"
+                           style="display:none;"
+                           onchange="previewReceipt(this)" />
+                </div>
+
+                <button type="submit" class="btn-submit-payment">
+                    <span class="material-symbols-outlined">send</span>
+                    Submit Payment
+                </button>
+
+            </form>
+        </div>
+    }
+
+    @* ── Already submitted — show receipt ── *@
+    @if (Model.Status == "Pending Review" && !string.IsNullOrEmpty(Model.ReceiptImage))
+    {
+        <div class="portal-card payment-submitted-card">
+            <div class="payment-submitted-header">
+                <span class="material-symbols-outlined">hourglass_top</span>
+                <h3>Receipt Submitted — Awaiting Confirmation</h3>
+            </div>
+            <p class="payment-submitted-note">
+                Your receipt has been submitted. Please wait for staff to confirm your payment.
+            </p>
+            @if (!string.IsNullOrEmpty(Model.ReferenceNumber))
+            {
+                <p class="payment-submitted-ref">
+                    Reference Number: <strong>@Model.ReferenceNumber</strong>
+                </p>
+            }
+            <img src="/@Model.ReceiptImage"
+                 alt="Submitted Receipt"
+                 class="payment-submitted-img" />
+        </div>
+    }
+}
+
+<script>
+    function previewReceipt(input) {
+        const file    = input.files[0];
+        const preview = document.getElementById('receiptPreview');
+        const zone    = document.getElementById('dropzone');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src          = e.target.result;
+                preview.style.display = 'block';
+                zone.querySelector('.upload-dropzone-icon').style.display = 'none';
+                zone.querySelector('.upload-dropzone-text').style.display = 'none';
+                zone.querySelector('.upload-dropzone-hint').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Drag & drop support
+    const dropzone = document.getElementById('dropzone');
+    if (dropzone) {
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const input   = document.getElementById('receiptFile');
+                const dt      = new DataTransfer();
+                dt.items.add(file);
+                input.files   = dt.files;
+                previewReceipt(input);
+            }
+        });
+    }
+
+    const toast = document.getElementById('toastMsg');
+    if (toast) {
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+</script>

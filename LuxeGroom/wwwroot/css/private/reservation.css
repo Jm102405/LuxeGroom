@@ -2,11 +2,11 @@
  * reservations.css
  * Styles for Admin Reservation Management page.
  * Updated in Thread 2.7: Added Handle Request button, modal, toast, and Cancelled badge.
+ * Updated in Thread 3.7: Added modal editable fields and amount summary styles.
  */
 
 /* ── SECTION HEADER ── */
 
-/* Top header row with title and action buttons */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -19,7 +19,6 @@
 
 /* ── ACTIVITY SECTION ── */
 
-/* Full-height flex column that contains the list and prevents overflow */
 .activity-section {
     display: flex;
     flex-direction: column;
@@ -29,7 +28,6 @@
 
 /* ── SCROLL WRAPPER ── */
 
-/* Scrollable inner area that grows to fill remaining height */
 .list-scroll-wrapper {
     overflow-y: auto;
     flex: 1;
@@ -147,7 +145,6 @@
     color: #FFC107;
 }
 
-/* Approved = same style as confirmed green */
 .badge--confirmed {
     background: rgba(34, 197, 94, 0.15);
     color: #22c55e;
@@ -263,10 +260,25 @@
     border-radius: 14px;
     padding: 32px;
     width: 100%;
-    max-width: 420px;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     animation: modalIn 0.2s ease;
 }
+
+    .modal-box::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .modal-box::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .modal-box::-webkit-scrollbar-thumb {
+        background: #2d3748;
+        border-radius: 10px;
+    }
 
 @keyframes modalIn {
     from {
@@ -314,6 +326,7 @@
     border: 1px solid #2d3748;
     border-radius: 10px;
     padding: 16px 18px;
+    margin-bottom: 16px;
 }
 
 .modal-info-label {
@@ -331,11 +344,83 @@
     margin: 4px 0 0;
 }
 
-.modal-actions are {
+/* ── MODAL EDITABLE FIELDS (NEW — Thread 3.7) ── */
+
+.modal-field-group {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
 }
+
+.modal-field-label {
+    font-size: 11px;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+}
+
+.modal-field-input {
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #e5e7eb;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+    .modal-field-input:focus {
+        border-color: #6b8cff;
+    }
+
+    .modal-field-input option {
+        background: #1a1f2e;
+        color: #e5e7eb;
+    }
+
+/* ── AMOUNT SUMMARY (NEW — Thread 3.7) ── */
+
+.modal-amount-summary {
+    background: #0f172a;
+    border: 1px solid #1e2d40;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-amount-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.modal-amount-downpayment {
+    font-size: 14px;
+    font-weight: 700;
+    color: #e5e7eb;
+    padding-top: 10px;
+    border-top: 1px solid #1e2d40;
+}
+
+    .modal-amount-downpayment span:last-child {
+        color: #22c55e;
+        font-size: 16px;
+    }
+
+/* ── MODAL ACTIONS ── */
 
 .modal-actions {
     display: flex;
