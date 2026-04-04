@@ -6,6 +6,9 @@
  * Updated in Thread 2.8: Creates User account (CUST-X) when accepting.
  * Updated in Thread 3.7: HandleAccept accepts edited fields from modal + computes
  * 50% down payment + auto-creates Payment record (status: Unpaid).
+ * Updated in Thread 4.0: Removed Gmail uniqueness check on HandleAccept.
+ *                         HandleAccept now checks if customer already has an account —
+ *                         if yes, skips account creation and creates Payment record only.
  */
 
 using LuxeGroom.Data;
@@ -79,55 +82,10 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 return RedirectToAction("Reservations");
             }
 
-            // 2) Gmail uniqueness check
-            var normalizedEmail = (reservation.Email ?? string.Empty).Trim().ToLower();
-            var emailInUsers = _context.Users
-                .AsEnumerable()
-                .Any(u => (u.Gmail ?? string.Empty).Trim().ToLower() == normalizedEmail);
+            // 2) Check if customer already has an account
+            bool hasExistingAccount = !string.IsNullOrEmpty(reservation.CustomerId);
 
-            if (emailInUsers)
-            {
-                TempData["Error"] = "This email already exists in the Users list.";
-                return RedirectToAction("Reservations");
-            }
-
-            // 3) Compute next CUST-X
-            var maxCustNum = _context.Customers
-                .AsEnumerable()
-                .Where(c => c.CustomerId != null && c.CustomerId.StartsWith("CUST-"))
-                .Select(c =>
-                {
-                    var parts = c.CustomerId!.Split('-');
-                    return parts.Length == 2 && int.TryParse(parts[1], out var n) ? n : 0;
-                })
-                .DefaultIfEmpty(0)
-                .Max();
-
-            var newCustomerId = $"CUST-{maxCustNum + 1}";
-
-            // 4) ManagedBy
-            var managedBy = HttpContext.Session.GetString("UserId")
-                          ?? HttpContext.Session.GetString("Username")
-                          ?? "Unknown";
-
-            // 5) Generate temp password
-            var plainPassword = GenerateTempPassword();
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(plainPassword);
-
-            // 6) Build unique username
-            var baseUsername = (reservation.OwnerName ?? "customer")
-                .Replace(" ", "").ToLower();
-            if (string.IsNullOrWhiteSpace(baseUsername)) baseUsername = "customer";
-
-            var finalUsername = baseUsername;
-            int counter = 1;
-            while (_context.Users.Any(u => u.Username == finalUsername))
-            {
-                finalUsername = $"{baseUsername}{counter}";
-                counter++;
-            }
-
-            // 7) Compute amount + 50% down payment
+            // 3) Compute amount + 50% down payment
             int totalAmount = 0;
             if (Prices.TryGetValue(groomingStyle, out var sizeMap) &&
                 sizeMap.TryGetValue(petSize, out var price))
@@ -136,42 +94,14 @@ namespace LuxeGroom.Controllers.PrivateControllers
             }
             decimal downPayment = Math.Round(totalAmount * 0.5m, 2);
 
-            // 8) Update reservation with edited fields
+            // 4) Update reservation with edited fields
             reservation.PetName = petName;
             reservation.PetSize = petSize;
             reservation.GroomingStyle = groomingStyle;
             reservation.ReservationDate = reservationDate;
             reservation.Status = "Approved";
 
-            // 9) Create Customer record
-            var customer = new Customer
-            {
-                CustomerId = newCustomerId,
-                Firstname = reservation.OwnerName,
-                Email = reservation.Email,
-                Phone = reservation.Phone,
-                Username = finalUsername,
-                Password = hashedPassword,
-                ManagedBy = managedBy,
-                DateCreated = DateTime.Now
-            };
-
-            // 10) Create User record
-            var user = new User
-            {
-                UserId = newCustomerId,
-                Username = finalUsername,
-                PasswordHash = hashedPassword,
-                Gmail = reservation.Email,
-                PhoneNumber = reservation.Phone ?? "",
-                Role = "Customer",
-                Status = "Active",
-                DateCreated = DateTime.Now,
-                ResetCode = null,
-                ResetCodeExpiry = null
-            };
-
-            // 11) Auto-create Payment record — status: Unpaid, amount = 50% down
+            // 5) Auto-create Payment record
             var payment = new Payment
             {
                 ReservationId = reservation.Id,
@@ -181,28 +111,107 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 Status = "Unpaid",
                 PaidAt = null
             };
-
-            _context.Customers.Add(customer);
-            _context.Users.Add(user);
             _context.Payments.Add(payment);
-            _context.SaveChanges();
 
-            // 12) Send welcome email
-            try
+            string successMsg;
+
+            if (hasExistingAccount)
             {
-                SendCustomerWelcomeEmail(
-                    reservation.Email,
-                    finalUsername,
-                    plainPassword,
-                    groomingStyle,
-                    petSize,
-                    totalAmount,
-                    (int)downPayment);
-            }
-            catch { }
+                // ── Existing customer — skip account creation ──
+                _context.SaveChanges();
 
-            TempData["Success"] =
-                $"Reservation approved. Customer {newCustomerId} created. Down payment due: ₱{downPayment:N0}.";
+                successMsg = $"Reservation approved. Down payment due: ₱{downPayment:N0}.";
+            }
+            else
+            {
+                // ── New customer — create Customer + User account ──
+
+                // 6) Compute next CUST-X
+                var maxCustNum = _context.Customers
+                    .AsEnumerable()
+                    .Where(c => c.CustomerId != null && c.CustomerId.StartsWith("CUST-"))
+                    .Select(c =>
+                    {
+                        var parts = c.CustomerId!.Split('-');
+                        return parts.Length == 2 && int.TryParse(parts[1], out var n) ? n : 0;
+                    })
+                    .DefaultIfEmpty(0)
+                    .Max();
+
+                var newCustomerId = $"CUST-{maxCustNum + 1}";
+
+                // 7) ManagedBy
+                var managedBy = HttpContext.Session.GetString("UserId")
+                              ?? HttpContext.Session.GetString("Username")
+                              ?? "Unknown";
+
+                // 8) Generate temp password
+                var plainPassword = GenerateTempPassword();
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(plainPassword);
+
+                // 9) Build unique username
+                var baseUsername = (reservation.OwnerName ?? "customer")
+                    .Replace(" ", "").ToLower();
+                if (string.IsNullOrWhiteSpace(baseUsername)) baseUsername = "customer";
+
+                var finalUsername = baseUsername;
+                int counter = 1;
+                while (_context.Users.Any(u => u.Username == finalUsername))
+                {
+                    finalUsername = $"{baseUsername}{counter}";
+                    counter++;
+                }
+
+                // 10) Create Customer record
+                var customer = new Customer
+                {
+                    CustomerId = newCustomerId,
+                    Firstname = reservation.OwnerName,
+                    Email = reservation.Email,
+                    Phone = reservation.Phone,
+                    Username = finalUsername,
+                    Password = hashedPassword,
+                    ManagedBy = managedBy,
+                    DateCreated = DateTime.Now
+                };
+
+                // 11) Create User record
+                var user = new User
+                {
+                    UserId = newCustomerId,
+                    Username = finalUsername,
+                    PasswordHash = hashedPassword,
+                    Gmail = reservation.Email,
+                    PhoneNumber = reservation.Phone ?? "",
+                    Role = "Customer",
+                    Status = "Active",
+                    DateCreated = DateTime.Now,
+                    ResetCode = null,
+                    ResetCodeExpiry = null
+                };
+
+                _context.Customers.Add(customer);
+                _context.Users.Add(user);
+                _context.SaveChanges();
+
+                // 12) Send welcome email
+                try
+                {
+                    SendCustomerWelcomeEmail(
+                        reservation.Email,
+                        finalUsername,
+                        plainPassword,
+                        groomingStyle,
+                        petSize,
+                        totalAmount,
+                        (int)downPayment);
+                }
+                catch { }
+
+                successMsg = $"Reservation approved. Customer {newCustomerId} created. Down payment due: ₱{downPayment:N0}.";
+            }
+
+            TempData["Success"] = successMsg;
             return RedirectToAction("Reservations");
         }
 
@@ -228,7 +237,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
             return RedirectToAction("Reservations");
         }
 
-        // ─── HELPERS ─────────────────────────────────────────────────────────────
+        // ─── HELPERS ──────────────────────────────────────────────────────────────
 
         private static string GenerateTempPassword()
         {

@@ -1,19 +1,120 @@
 ﻿@*
  * Reserve.cshtml
- * Customer Portal — New reservation page.
- * Created in Thread 3.6.
+ * Customer Portal - Make a Reservation page.
+ * Customer fills Pet Name, Pet Size, Grooming Style, and Date.
+ * Owner info pre-filled from session on the backend.
+ * Created in Thread 3.9.
+ * Updated in Thread 3.9: Fixed Layout path. Replaced Payment content with Reserve form.
+ * Updated in Thread 4.0: Fixed form action to /CustomerPortal/Reserve.
+ *                         Fixed cancel + success overlay links to /CustomerPortal/MyBookings.
+ *                         Added TempData success overlay trigger.
  *@
 
 @{
     Layout = "~/Views/Private/CustomerPortal/_Layout.cshtml";
-    ViewBag.Title = "Reserve";
+    ViewBag.Title = "Make a Reservation";
 }
 
-<div class="page-header">
-    <h1 class="page-title">Reserve</h1>
-    <p class="page-subtitle">Book a new grooming session for your pet.</p>
+<link rel="stylesheet" href="~/css/private/customerportal/_base.css" />
+<link rel="stylesheet" href="~/css/private/customerportal/reserve.css" />
+
+<div class="reserve-wrapper">
+
+    <div class="reserve-panel">
+
+        @* ===== TOP ICON ===== *@
+        <div class="reserve-icon">
+            <span class="material-symbols-outlined">calendar_month</span>
+        </div>
+
+        <h2 class="reserve-title">Make a Reservation</h2>
+        <p class="reserve-subtitle">Fill in your pet's details and preferred schedule.</p>
+
+        <form id="reserveForm" class="reserve-form" action="/CustomerPortal/Reserve" method="post">
+            @Html.AntiForgeryToken()
+
+            @* ===== PET'S NAME ===== *@
+            <div class="form-group">
+                <label class="form-label">PET'S NAME</label>
+                <input type="text" name="petName" class="form-input" placeholder="e.g. Max" required />
+            </div>
+
+            @* ===== PET SIZE ===== *@
+            <div class="form-group">
+                <label class="form-label">PET SIZE</label>
+                <div class="form-select-wrapper">
+                    <select name="petSize" class="form-input form-select" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="Small Dog">Small Dog</option>
+                        <option value="Medium Dog">Medium Dog</option>
+                        <option value="Large Dog">Large Dog</option>
+                    </select>
+                    <span class="form-select-arrow material-symbols-outlined">expand_more</span>
+                </div>
+            </div>
+
+            @* ===== GROOMING STYLE ===== *@
+            <div class="form-group">
+                <label class="form-label">GROOMING STYLE</label>
+                <div class="form-select-wrapper">
+                    <select name="groomingStyle" class="form-input form-select" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="Bath & Brush">Bath &amp; Brush</option>
+                        <option value="Full Groom">Full Groom</option>
+                        <option value="Custom Cut">Custom Cut</option>
+                    </select>
+                    <span class="form-select-arrow material-symbols-outlined">expand_more</span>
+                </div>
+            </div>
+
+            @* ===== RESERVATION DATE ===== *@
+            <div class="form-group">
+                <label class="form-label">RESERVATION DATE</label>
+                <input type="date" name="reservationDate" class="form-input" required />
+            </div>
+
+            @* ===== ACTIONS ===== *@
+            <div class="reserve-actions">
+                <button type="submit" class="btn-reserve-confirm" id="submitBtn">Confirm Reservation</button>
+                <a href="/CustomerPortal/MyBookings" class="btn-reserve-cancel">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
 </div>
 
-<div class="portal-card">
-    <p class="portal-text">Reservation form coming soon.</p>
+@* ===== SUCCESS OVERLAY ===== *@
+<div class="success-overlay" id="successOverlay">
+    <div class="success-panel">
+        <div class="success-icon">
+            <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <h2 class="success-title">Reservation Submitted</h2>
+        <p class="success-message">
+            Thank you for choosing LuxeGroom. Your reservation has been received
+            and is currently under review. Our concierge team will be in touch shortly.
+        </p>
+        <a href="/CustomerPortal/MyBookings" class="btn-success-close">View My Bookings</a>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // Set min date to today
+        const dateInput = document.querySelector('input[name="reservationDate"]');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+        }
+
+        // Show success overlay if reservation was just submitted
+        const showSuccess = '@TempData["Success"]';
+        if (showSuccess === 'true') {
+            document.getElementById('successOverlay').classList.add('success--active');
+            document.body.style.overflow = 'hidden';
+        }
+
+    });
+</script>

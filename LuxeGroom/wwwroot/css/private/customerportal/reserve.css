@@ -1,0 +1,336 @@
+﻿/*
+ * reserve.css
+ * Styles for the Customer Portal Reserve page.
+ * Mirrors the luxury reservation modal design from the landing page.
+ * Created in Thread 3.9.
+ */
+
+/* ===== PAGE WRAPPER ===== */
+
+/* Full-height centered layout for the reserve page */
+.reserve-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    background: var(--bg-dark);
+}
+
+/* ===== RESERVE PANEL ===== */
+
+/* Centered card with gold border — mirrors .modal-panel */
+.reserve-panel {
+    background: var(--charcoal);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    width: 100%;
+    max-width: 520px;
+    padding: 64px 48px 48px;
+    position: relative;
+    text-align: center;
+    animation: reserveSlideIn 0.3s ease;
+}
+
+/* Slide up and fade in */
+@keyframes reserveSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== TOP ICON ===== */
+
+/* Gold icon floated above the top border */
+.reserve-icon {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--charcoal);
+    padding: 0 16px;
+}
+
+    /* Gold bordered icon inside the badge */
+    .reserve-icon .material-symbols-outlined {
+        font-size: 40px;
+        color: var(--accent-gold);
+        border: 1px solid rgba(197, 160, 89, 0.3);
+        padding: 8px;
+        display: block;
+    }
+
+/* ===== TITLE & SUBTITLE ===== */
+
+/* Large serif title */
+.reserve-title {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+/* Muted subtitle below title */
+.reserve-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* ===== FORM ===== */
+
+/* Left-aligned form content */
+.reserve-form {
+    text-align: left;
+}
+
+/* Spacing block per field */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Small uppercase spaced label */
+.form-label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 8px;
+}
+
+/* Transparent input with gold border */
+.form-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(197, 160, 89, 0.25);
+    color: #ffffff;
+    font-family: var(--font-display);
+    font-size: 14px;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+}
+
+    /* Gold border on focus */
+    .form-input:focus {
+        border-color: var(--accent-gold);
+    }
+
+    /* Very dim placeholder */
+    .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Gold-tinted calendar picker */
+    .form-input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(0.5) sepia(1) saturate(3) hue-rotate(5deg);
+        cursor: pointer;
+    }
+
+/* ===== SELECT DROPDOWN ===== */
+
+/* Wrapper for custom chevron */
+.form-select-wrapper {
+    position: relative;
+}
+
+/* Select with extra right padding for arrow */
+.form-select {
+    cursor: pointer;
+    padding-right: 48px;
+}
+
+    /* Dark background for options */
+    .form-select option {
+        background: var(--charcoal);
+        color: #ffffff;
+    }
+
+/* Gold chevron pinned to right */
+.form-select-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: rgba(197, 160, 89, 0.5);
+    pointer-events: none;
+}
+
+/* ===== ACTIONS ===== */
+
+/* Two-column grid for confirm and cancel */
+.reserve-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+/* Gold gradient confirm button */
+.btn-reserve-confirm {
+    padding: 14px;
+    background: linear-gradient(135deg, #C5A059 0%, #E2C48E 50%, #C5A059 100%);
+    color: var(--primary-navy);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+    .btn-reserve-confirm:hover {
+        opacity: 0.9;
+    }
+
+    .btn-reserve-confirm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+/* Transparent cancel anchor — styled as button */
+.btn-reserve-cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    .btn-reserve-cancel:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+    }
+
+/* ===== SUCCESS OVERLAY ===== */
+
+/* Full-screen blurred overlay — hidden by default */
+.success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(5, 7, 15, 0.92);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+    /* Show with fade-in when active */
+    .success-overlay.success--active {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== SUCCESS PANEL ===== */
+
+.success-panel {
+    background: var(--charcoal);
+    border: 1px solid rgba(197, 160, 89, 0.35);
+    max-width: 480px;
+    width: 100%;
+    padding: 64px 48px 56px;
+    text-align: center;
+    animation: reserveSlideIn 0.35s ease;
+}
+
+/* Gold check icon */
+.success-icon {
+    margin-bottom: 28px;
+}
+
+    .success-icon .material-symbols-outlined {
+        font-size: 56px;
+        color: var(--accent-gold);
+    }
+
+/* Serif success heading */
+.success-title {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 16px;
+}
+
+/* Muted success body */
+.success-message {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+/* Gold outlined close button */
+.btn-success-close {
+    display: inline-block;
+    padding: 16px 48px;
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    background: transparent;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    .btn-success-close:hover {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+    }
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 600px) {
+    .reserve-panel {
+        padding: 56px 24px 36px;
+    }
+
+    .reserve-title {
+        font-size: 26px;
+    }
+
+    .reserve-actions {
+        grid-template-columns: 1fr;
+    }
+}
