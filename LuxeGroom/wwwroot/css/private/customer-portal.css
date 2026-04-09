@@ -661,3 +661,121 @@
     border: 1px solid rgba(239, 68, 68, 0.3);
     color: #ef4444;
 }
+
+/* ===== LOGOUT MODAL ===== */
+
+.logout-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(5, 7, 15, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+    .logout-modal-overlay.logout-modal--active {
+        display: flex;
+        animation: logoutFadeIn 0.25s ease;
+    }
+
+@keyframes logoutFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.logout-modal {
+    background: var(--charcoal);
+    border: 1px solid rgba(197, 160, 89, 0.3);
+    width: 100%;
+    max-width: 400px;
+    padding: 48px 40px 40px;
+    text-align: center;
+    animation: logoutSlideIn 0.3s ease;
+}
+
+@keyframes logoutSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logout-modal-icon {
+    margin-bottom: 20px;
+}
+
+    .logout-modal-icon .material-symbols-outlined {
+        font-size: 44px;
+        color: #C5A059;
+    }
+
+.logout-modal-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+.logout-modal-message {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.7;
+    margin-bottom: 32px;
+}
+
+.logout-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.logout-modal-confirm {
+    padding: 13px;
+    background: linear-gradient(135deg, #C5A059 0%, #E2C48E 50%, #C5A059 100%);
+    color: #05070f;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+    .logout-modal-confirm:hover {
+        opacity: 0.88;
+    }
+
+.logout-modal-cancel {
+    padding: 13px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.5);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    .logout-modal-cancel:hover {
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+    }

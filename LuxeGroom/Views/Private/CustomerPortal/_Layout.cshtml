@@ -4,6 +4,8 @@
  * Sidebar with 4 nav items: Payment, My Bookings, Reserve, Settings.
  * Separate from the admin/staff _Layout.cshtml.
  * Created in Thread 3.6.
+ * Updated in Thread 4.3: Fixed logout URL to /Login/Logout.
+ * Updated in Thread 4.3: Replaced browser confirm with custom luxury logout modal.
  *@
 
 <!DOCTYPE html>
@@ -16,6 +18,7 @@
     <link rel="stylesheet" href="~/css/fonts.css" />
     <link rel="stylesheet" href="~/css/private/dashboard.css" />
     <link rel="stylesheet" href="~/css/private/customer-portal.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
 <body>
     <div class="dashboard-container">
@@ -44,7 +47,7 @@
                 </a>
 
                 <a href="/CustomerPortal/MyBookings"
-                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MyBookings" ? "active" : "")">
+                   class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "MyBookings" ? "active" : "")">
                     My Bookings
                 </a>
 
@@ -54,7 +57,7 @@
                 </a>
 
                 <a href="/CustomerPortal/Settings"
-                   class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
+                   class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")">
                     Settings
                 </a>
 
@@ -73,11 +76,34 @@
         </main>
     </div>
 
+    @* ===== LOGOUT MODAL ===== *@
+    <div class="logout-modal-overlay" id="logoutModal">
+        <div class="logout-modal">
+            <div class="logout-modal-icon">
+                <span class="material-symbols-outlined">logout</span>
+            </div>
+            <h3 class="logout-modal-title">Leaving so soon?</h3>
+            <p class="logout-modal-message">Are you sure you want to log out of your LuxeGroom account?</p>
+            <div class="logout-modal-actions">
+                <button class="logout-modal-confirm" onclick="proceedLogout()">Yes, Log Out</button>
+                <button class="logout-modal-cancel" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                location.href = '/CustomerLogin/Logout';
-            }
+            document.getElementById('logoutModal').classList.add('logout-modal--active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('logout-modal--active');
+            document.body.style.overflow = '';
+        }
+
+        function proceedLogout() {
+            window.location.href = '/Login/Logout';
         }
     </script>
 </body>

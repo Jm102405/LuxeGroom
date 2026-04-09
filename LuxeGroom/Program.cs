@@ -21,10 +21,9 @@ builder.Services.AddScoped<LuxeGroom.Services.EmailService>();
 builder.Services.AddDbContext<LuxeGroomDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddHttpClient(); // => needed for the chatbot to work which uses http client
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -39,6 +38,16 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseSession();
+
+// Prevent browser from caching authenticated pages
+// — ensures back/forward buttons cannot restore protected pages after logout
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
 
 app.UseAuthorization();
 

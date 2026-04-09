@@ -3,9 +3,11 @@
  * Shared layout for all private (authenticated) pages in LuxeGroom.
  * Includes the sidebar navigation, logo, role-based menu visibility,
  * logout confirmation, and the main content render area.
- * Updated in Thread3.2: Merged Report links into a single collapsible Reports dropdown.
- * Updated in Thread3.2: Moved Reports dropdown CSS to dashboard.css.
- * Updated in Thread3.2: Added Revenue, Grooming Style, Payment, Monthly Summary report nav links.
+ * Updated in Thread 3.2: Merged Report links into a single collapsible Reports dropdown.
+ * Updated in Thread 3.2: Moved Reports dropdown CSS to dashboard.css.
+ * Updated in Thread 4.3: Replaced browser confirm with custom luxury logout modal.
+ * Updated in Thread 4.3.2: Removed Reservation, Customer, Payment report links.
+ *   Reports dropdown now contains: Revenue, Grooming Style, Monthly Summary only.
  *@
 
 <!DOCTYPE html>
@@ -34,16 +36,19 @@
 
             <nav class="nav-menu">
 
+                @* Dashboard *@
                 <a href="/Dashboard/Dashboard"
                    class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
                     Dashboard
                 </a>
 
+                @* Reservation *@
                 <a href="/Reservation/Reservations"
                    class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Reservation" ? "active" : "")">
                     Reservation
                 </a>
 
+                @* Customers *@
                 <a href="/Customers/Customers"
                    class="nav-item @(
                    ViewContext.RouteData.Values["controller"]?.ToString() == "Customers" &&
@@ -73,42 +78,34 @@
                             <span class="dropdown-arrow">▾</span>
                         </div>
                         <div class="nav-sub-menu">
-                            <a href="/Reports/ReservationReport"
-                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "ReservationReport" ? "active" : "")">
-                                Reservation Reports
-                            </a>
-                            <a href="/Reports/CustomerReport"
-                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "CustomerReport" ? "active" : "")">
-                                Customer Reports
-                            </a>
+                            @* Revenue Report *@
                             <a href="/Reports/RevenueReport"
                                class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "RevenueReport" ? "active" : "")">
                                 Revenue Report
                             </a>
+                            @* Grooming Style Report *@
                             <a href="/Reports/GroomingStyleReport"
                                class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "GroomingStyleReport" ? "active" : "")">
                                 Grooming Style Report
                             </a>
-                            <a href="/Reports/PaymentReport"
-                               class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "PaymentReport" ? "active" : "")">
-                                Payment Report
-                            </a>
+                            @* Monthly Summary *@
                             <a href="/Reports/MonthlySummaryReport"
                                class="nav-sub-item @(ViewContext.RouteData.Values["action"]?.ToString() == "MonthlySummaryReport" ? "active" : "")">
-                                Monthly Summary Report
+                                Monthly Summary
                             </a>
                         </div>
                     </div>
                 }
 
+                @* Settings *@
                 <a href="/Settings/Settings"
                    class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Settings" ? "active" : "")">
                     Settings
                 </a>
 
-                <!-- Chatbot  -->
+                @* Chatbot *@
                 <a href="/Chatbot/Chatbot"
-                       class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Chatbot" ? "active" : "")">
+                   class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Chatbot" ? "active" : "")">
                     Chatbot
                 </a>
 
@@ -127,13 +124,40 @@
         </main>
     </div>
 
+    @* ===== LOGOUT MODAL ===== *@
+    <div class="logout-modal-overlay" id="logoutModal">
+        <div class="logout-modal">
+            <div class="logout-modal-icon">
+                <span class="material-symbols-outlined">logout</span>
+            </div>
+            <h3 class="logout-modal-title">Leaving so soon?</h3>
+            <p class="logout-modal-message">Are you sure you want to log out of your LuxeGroom account?</p>
+            <div class="logout-modal-actions">
+                <button class="logout-modal-confirm" onclick="proceedLogout()">Yes, Log Out</button>
+                <button class="logout-modal-cancel" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Open logout confirmation modal
         function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                location.href = '/Login/Logout';
-            }
+            document.getElementById('logoutModal').classList.add('logout-modal--active');
+            document.body.style.overflow = 'hidden';
         }
 
+        // Close logout modal without logging out
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('logout-modal--active');
+            document.body.style.overflow = '';
+        }
+
+        // Proceed to logout — redirects to LoginController.Logout()
+        function proceedLogout() {
+            window.location.href = '/Login/Logout';
+        }
+
+        // Toggle collapsible nav dropdown open/closed
         function toggleDropdown(id) {
             const dropdown = document.getElementById(id);
             dropdown.classList.toggle('open');

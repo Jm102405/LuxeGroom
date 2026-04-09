@@ -1,4 +1,11 @@
-﻿namespace LuxeGroom.ViewModels
+﻿/*
+ * DashboardViewModel.cs
+ * ViewModel for the Admin/Staff Dashboard.
+ * Updated in Thread 4.3.2: EstimatedRevenueThisMonth replaced with
+ *   RevenueThisMonth — real sum of paid Payment.AmountDue for current month.
+ */
+
+namespace LuxeGroom.ViewModels
 {
     public class DashboardViewModel
     {
@@ -7,7 +14,9 @@
 
         public int AppointmentsToday { get; set; }
         public int TotalClients { get; set; }
-        public decimal EstimatedRevenueThisMonth { get; set; }
+
+        // Real revenue — sum of AmountDue from Payments where Status = "Paid" this month
+        public decimal RevenueThisMonth { get; set; }
 
         public List<RecentAppointmentItem> RecentAppointments { get; set; } = new();
     }

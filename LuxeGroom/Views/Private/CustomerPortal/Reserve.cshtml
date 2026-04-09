@@ -8,6 +8,7 @@
  * Updated in Thread 4.0: Fixed form action to /CustomerPortal/Reserve.
  *                         Fixed cancel + success overlay links to /CustomerPortal/MyBookings.
  *                         Added TempData success overlay trigger.
+ * Updated in Thread 4.2f: Added TempData["Error"] display for active reservation block.
  *@
 
 @{
@@ -29,6 +30,15 @@
 
         <h2 class="reserve-title">Make a Reservation</h2>
         <p class="reserve-subtitle">Fill in your pet's details and preferred schedule.</p>
+
+        @* ===== ERROR MESSAGE ===== *@
+        @if (TempData["Error"] != null)
+        {
+            <div class="reserve-error">
+                <span class="material-symbols-outlined">error</span>
+                <p>@TempData["Error"]</p>
+            </div>
+        }
 
         <form id="reserveForm" class="reserve-form" action="/CustomerPortal/Reserve" method="post">
             @Html.AntiForgeryToken()

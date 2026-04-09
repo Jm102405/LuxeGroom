@@ -4,197 +4,161 @@
  * Merged from userform.css and usermanagement.css.
  * Covers the form layout, user list, search bar, action buttons,
  * toggle switch, scroll wrapper, and luxury confirm modal.
+ * Updated in Thread 4.3.2: Fixed Add User form UI — icons, spacing, placeholder, gaps.
+ * Updated in Thread 4.3.2: Fixed double scrollbar — split form-section and list-section scroll context.
+ * Updated in Thread 4.3.2: Form now fits within viewport — internal scroll, tighter padding.
  * Used by Views/Private/User.cshtml.
  */
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   FROM userform.css
+   FORM SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* Center header to match form width */
 .dashboard-header {
     max-width: 680px;
     margin: 0 auto 24px auto;
     text-align: center;
 }
 
-/* Centered card container for the form */
 .user-form-container {
     max-width: 680px;
     margin: 0 auto;
     background: #1a1f2e;
     border-radius: 12px;
-    padding: 40px;
+    padding: 28px 40px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* Error Alert */
-
-/* Red left-bordered alert box for form errors */
 .error-alert {
     background: #fee2e2;
     border-left: 4px solid #ef4444;
     padding: 15px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     border-radius: 8px;
 }
 
-    /* Error message text inside the alert */
     .error-alert p {
         color: #dc2626;
         margin: 0;
         font-weight: 500;
     }
 
-/* Form Row (2 columns) */
+/* Success Alert */
+.success-alert {
+    background: #dcfce7;
+    border-left: 4px solid #22c55e;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
 
-/* Two-column grid for side-by-side form fields */
+    .success-alert p {
+        color: #15803d;
+        margin: 0;
+        font-weight: 500;
+    }
+
+/* Form Row — 2 columns */
 .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 /* Form Group */
-
-/* Spacing block for each label and input pair */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
-/* Small uppercase-style label above each input */
+/* Label */
 .form-label {
     display: block;
     color: #d1d5db;
     font-size: 12px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     letter-spacing: 0.3px;
 }
 
-/* Input Wrapper with Icon */
-
-/* Relative wrapper for positioning icon inside the input */
+/* Input Wrapper */
 .input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-/* Icon pinned to the left inside the input */
+/* Left icon inside input */
 .input-icon {
     position: absolute;
-    left: 16px;
-    color: #6b7280;
-    font-size: 18px;
+    left: 14px;
+    font-size: 16px;
+    line-height: 1;
     pointer-events: none;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
 }
 
-/* Dark input with padding for left icon */
+/* Input field */
 .form-input {
     width: 100%;
-    padding: 14px 45px 14px 48px;
-    background: #0f1419;
-    border: 1px solid #2d3748;
+    padding: 13px 16px 13px 46px;
+    background: #111827;
+    border: 1px solid #374151;
     border-radius: 8px;
-    color: #9ca3af;
+    color: #e5e7eb;
     font-size: 14px;
-    transition: all 0.3s ease;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    font-family: inherit;
 }
 
-    /* Blue border highlight on input focus */
     .form-input:focus {
         outline: none;
         border-color: #3b82f6;
         background: #0f1419;
     }
 
-    /* Dimmed placeholder text */
     .form-input::placeholder {
         color: #4b5563;
+        font-size: 13px;
     }
 
-/* Password Eye Image */
-
-/* Eye toggle icon positioned on the right of the password input */
-.password-toggle {
-    position: absolute;
-    right: 16px;
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-    opacity: 0.5;
-    transition: opacity 0.2s ease;
-    z-index: 2;
-    filter: brightness(0) invert(0.5);
-}
-
-    .password-toggle:hover {
-        opacity: 0.8;
-    }
-
-/* Select */
-
-/* Custom styled select with hidden default arrow and SVG chevron */
+/* Select field */
 select.form-input {
-    padding-left: 48px;
-    padding-right: 45px;
     cursor: pointer;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 16px center;
-    background-color: #0f1419;
+    background-position: right 14px center;
+    background-color: #111827;
+    color: #9ca3af;
 }
 
-/* Password Requirements */
-
-.password-requirements {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
-    padding: 12px 14px;
-    background: #0f1419;
-    border: 1px solid #2d3748;
-    border-radius: 8px;
-}
-
-.requirement {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    transition: color 0.2s;
-}
-
-    .requirement.passed {
-        color: #22c55e;
+    select.form-input:focus {
+        color: #e5e7eb;
     }
 
-    .requirement.failed {
-        color: #ef4444;
-    }
-
-.req-icon {
-    font-size: 13px;
-    font-weight: 700;
-    width: 14px;
-    text-align: center;
+/* Field hint */
+.field-hint {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 5px;
+    padding-left: 2px;
 }
 
 /* Active Account Toggle */
-
-/* Row separating toggle label from the switch */
 .toggle-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 0;
-    margin: 30px 0 25px 0;
+    padding: 14px 0;
+    margin: 14px 0;
     border-top: 1px solid #2d3748;
     border-bottom: 1px solid #2d3748;
 }
@@ -202,13 +166,13 @@ select.form-input {
 .toggle-label {
     display: flex;
     flex-direction: column;
+    gap: 3px;
 }
 
     .toggle-label strong {
         color: #f3f4f6;
         font-size: 14px;
         font-weight: 600;
-        margin-bottom: 4px;
     }
 
     .toggle-label span {
@@ -217,7 +181,6 @@ select.form-input {
     }
 
 /* Toggle Switch */
-
 .toggle-switch {
     position: relative;
     width: 52px;
@@ -226,6 +189,7 @@ select.form-input {
     border-radius: 50px;
     cursor: pointer;
     transition: background 0.3s ease;
+    flex-shrink: 0;
 }
 
     .toggle-switch.active {
@@ -248,17 +212,43 @@ select.form-input {
     left: 27px;
 }
 
-/* Buttons */
+/* Email notice */
+.email-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #0f1419;
+    border: 1px solid #2d3748;
+    border-left: 3px solid #3b82f6;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #9ca3af;
+    line-height: 1.5;
+}
 
+    .email-notice span {
+        font-size: 16px;
+        margin-top: 1px;
+        flex-shrink: 0;
+        font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+    }
+
+    .email-notice p {
+        margin: 0;
+    }
+
+/* Form Buttons */
 .form-buttons {
     display: flex;
-    gap: 15px;
-    margin-top: 30px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .btn-cancel {
     flex: 0 0 auto;
-    padding: 13px 28px;
+    padding: 12px 24px;
     background: transparent;
     color: #9ca3af;
     border: 1px solid #374151;
@@ -266,7 +256,8 @@ select.form-input {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    font-family: inherit;
 }
 
     .btn-cancel:hover {
@@ -277,7 +268,7 @@ select.form-input {
 
 .btn-create {
     flex: 1;
-    padding: 13px;
+    padding: 12px;
     background: #3b82f6;
     color: white;
     border: none;
@@ -285,8 +276,9 @@ select.form-input {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    font-family: inherit;
 }
 
     .btn-create:hover {
@@ -299,59 +291,44 @@ select.form-input {
         transform: translateY(0);
     }
 
-/* Gmail hint below email input */
-.field-hint {
-    font-size: 11px;
-    color: #6b7280;
-    margin-top: 6px;
-    padding-left: 4px;
-}
-
-/* Info notice about auto-generated password email */
-.email-notice {
+/* Base activity section */
+.activity-section {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 14px 16px;
-    background: #0f1419;
-    border: 1px solid #2d3748;
-    border-left: 3px solid #3b82f6;
-    border-radius: 8px;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #9ca3af;
-    line-height: 1.5;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
 }
 
-    .email-notice span {
-        font-size: 16px;
-        margin-top: 1px;
+    /* Form section — scrollable internally so buttons are always reachable */
+    .activity-section.form-section {
+        height: calc(100vh - 180px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
     }
 
-    .email-notice p {
-        margin: 0;
+        .activity-section.form-section::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .activity-section.form-section::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .activity-section.form-section::-webkit-scrollbar-thumb {
+            background: #2d3748;
+            border-radius: 10px;
+        }
+
+            .activity-section.form-section::-webkit-scrollbar-thumb:hover {
+                background: #4b5563;
+            }
+
+    /* List section — fixed height with internal scroll */
+    .activity-section.list-section {
+        height: calc(100vh - 180px);
+        overflow: hidden;
     }
-
-/* Success alert */
-.success-alert {
-    background: #dcfce7;
-    border-left: 4px solid #22c55e;
-    padding: 15px;
-    margin-bottom: 25px;
-    border-radius: 8px;
-}
-
-    .success-alert p {
-        color: #15803d;
-        margin: 0;
-        font-weight: 500;
-    }
-
-/* Scrollable wrapper for the form section */
-.activity-section.form-section {
-    overflow-y: auto;
-    max-height: calc(100vh - 180px);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -360,7 +337,7 @@ select.form-input {
     }
 
     .user-form-container {
-        padding: 25px;
+        padding: 24px;
     }
 
     .dashboard-header {
@@ -370,10 +347,9 @@ select.form-input {
 
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   FROM usermanagement.css
+   LIST SECTION
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* Section Header */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -384,7 +360,6 @@ select.form-input {
     flex-shrink: 0;
 }
 
-/* Scroll wrapper */
 .list-scroll-wrapper {
     overflow-y: auto;
     flex: 1;
@@ -407,22 +382,12 @@ select.form-input {
             background: #4b5563;
         }
 
-/* Activity section — full-height flex column for the list */
-.activity-section {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 180px);
-    overflow: hidden;
-}
-
-/* Header Buttons */
 .header-buttons {
     display: flex;
     gap: 10px;
     align-items: center;
 }
 
-/* Header Icon Buttons (Add User + Toggle) */
 .header-icon-btn {
     display: flex;
     align-items: center;
@@ -448,7 +413,6 @@ select.form-input {
         color: white;
     }
 
-/* Add New User Button */
 .add-user-btn {
     background: #1132d4;
 }
@@ -458,7 +422,6 @@ select.form-input {
         transform: scale(1.02);
     }
 
-/* Toggle Inactive/Active Button */
 .toggle-inactive-btn {
     background: #6366f1;
 }
@@ -468,14 +431,12 @@ select.form-input {
         transform: scale(1.02);
     }
 
-/* Action Buttons Container */
 .action-buttons {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
-/* Icon Button Base */
 .icon-btn {
     border: none;
     cursor: pointer;
@@ -495,7 +456,6 @@ select.form-input {
         filter: brightness(0) invert(1);
     }
 
-    /* Edit Button */
     .icon-btn.edit-btn {
         background: #3b82f6;
     }
@@ -505,7 +465,6 @@ select.form-input {
             transform: scale(1.1);
         }
 
-    /* Deactivate Button */
     .icon-btn.delete-btn {
         background: #ef4444;
     }
@@ -515,7 +474,6 @@ select.form-input {
             transform: scale(1.1);
         }
 
-    /* Activate Button */
     .icon-btn.activate-btn {
         background: #22c55e;
     }
@@ -525,19 +483,16 @@ select.form-input {
             transform: scale(1.1);
         }
 
-/* Date Created Text */
 .date-created {
     color: #64748b;
 }
 
-/* Empty State */
 .empty-state {
     text-align: center;
     padding: 40px;
     color: #64748b;
 }
 
-/* Inactive user dimmed */
 #inactiveList .activity-item {
     opacity: 0.7;
 }
@@ -546,7 +501,6 @@ select.form-input {
         opacity: 1;
     }
 
-/* Search bar wrapper */
 .search-wrapper {
     position: relative;
     display: flex;
@@ -572,6 +526,7 @@ select.form-input {
     font-size: 14px;
     outline: none;
     transition: border-color 0.3s;
+    font-family: inherit;
 }
 
     .search-input:focus {
@@ -582,7 +537,6 @@ select.form-input {
         color: #4b5563;
     }
 
-/* No results message */
 .no-results {
     text-align: center;
     padding: 20px;
@@ -590,7 +544,10 @@ select.form-input {
     font-size: 14px;
 }
 
-/* ─── Luxury Confirm Modal ───────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LUXURY CONFIRM MODAL
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .lux-modal-overlay {
     display: none;
@@ -644,14 +601,13 @@ select.form-input {
     margin: 36px 0 12px;
     line-height: 1;
     filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.15));
+    font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .lux-modal-badge {
     display: block;
     width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 16px;
+    margin: 0 auto 16px;
     padding: 4px 14px;
     border-radius: 999px;
     font-size: 11px;

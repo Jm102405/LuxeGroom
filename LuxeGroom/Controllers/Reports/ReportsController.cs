@@ -1,11 +1,12 @@
 ﻿/*
  * ReportsController.cs
  * Handles all Report views for LuxeGroom admin.
- * Updated in Thread3.2: Added stub actions for Revenue, GroomingStyle, Payment, MonthlySummary reports.
+ * Updated in Thread 3.2: Added stub actions for all report types.
+ * Updated in Thread 4.3.2: Removed Reservation, Customer, Payment reports.
+ *   Kept and implemented: Revenue, GroomingStyle, MonthlySummary.
  */
 
 using LuxeGroom.Data;
-using LuxeGroom.Data.Generated;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,32 +23,25 @@ namespace LuxeGroom.Controllers.Reports
 
         /*
          * GuardAdmin()
-         * Blocks access if the user is not logged in or not an Admin.
-         * - No session → redirect to Login page
-         * - Logged in but not Admin (e.g., Staff) → redirect to Dashboard
-         * - Admin → returns null (proceed normally)
+         * Blocks access if not logged in or not Admin.
          */
         private IActionResult? GuardAdmin()
         {
             var username = HttpContext.Session.GetString("Username");
             var role = HttpContext.Session.GetString("Role");
 
-            // No active session — redirect to login
             if (string.IsNullOrEmpty(username))
                 return RedirectToAction("Index", "Login");
 
-            // Logged in but insufficient role — redirect to dashboard silently
             if (role != "Admin")
                 return RedirectToAction("Dashboard", "Dashboard");
 
-            // Access granted
             return null;
         }
 
         /*
          * SetViewBag()
          * Populates ViewBag with session values needed by _Layout.cshtml.
-         * Called in every action so the sidebar renders correctly (role-based nav).
          */
         private void SetViewBag()
         {
@@ -56,131 +50,183 @@ namespace LuxeGroom.Controllers.Reports
         }
 
         /*
-         * ReservationReport — GET: /Reports/ReservationReport
-         * Displays a filterable list of all reservations.
-         * Filters: Date From, Date To, Status (Pending / Approved / Cancelled)
-         * Results are ordered by most recent reservation date.
-         */
-        public async Task<IActionResult> ReservationReport(string dateFrom, string dateTo, string status)
-        {
-            var guard = GuardAdmin();
-            if (guard != null) return guard;
-            SetViewBag();
-
-            var query = _context.Reservations.AsQueryable();
-
-            // Apply date range filters if provided
-            if (DateTime.TryParse(dateFrom, out var from))
-                query = query.Where(r => r.ReservationDate >= from);
-
-            if (DateTime.TryParse(dateTo, out var to))
-                query = query.Where(r => r.ReservationDate <= to);
-
-            // Apply status filter if selected
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(r => r.Status == status);
-
-            var reservations = await query
-                .OrderByDescending(r => r.ReservationDate)
-                .ToListAsync();
-
-            // Pass results and filter values back to the view
-            ViewBag.Reservations = reservations;
-            ViewBag.DateFrom = dateFrom;
-            ViewBag.DateTo = dateTo;
-            ViewBag.Status = status;
-
-            return View();
-        }
-
-        /*
-         * CustomerReport — GET: /Reports/CustomerReport
-         * Displays a searchable list of all registered customers.
-         * Filters: Search by Name, Search by Email
-         * Results are ordered alphabetically by first name.
-         */
-        public async Task<IActionResult> CustomerReport(string searchName, string searchEmail)
-        {
-            var guard = GuardAdmin();
-            if (guard != null) return guard;
-            SetViewBag();
-
-            var query = _context.Customers.AsQueryable();
-
-            // Apply name filter if provided
-            if (!string.IsNullOrEmpty(searchName))
-                query = query.Where(c => c.Firstname.Contains(searchName));
-
-            // Apply email filter if provided
-            if (!string.IsNullOrEmpty(searchEmail))
-                query = query.Where(c => c.Email.Contains(searchEmail));
-
-            var customers = await query
-                .OrderBy(c => c.Firstname)
-                .ToListAsync();
-
-            // Pass results and filter values back to the view
-            ViewBag.Customers = customers;
-            ViewBag.SearchName = searchName;
-            ViewBag.SearchEmail = searchEmail;
-
-            return View();
-        }
-
-        /*
          * RevenueReport — GET: /Reports/RevenueReport
-         * Shows estimated revenue based on approved reservations.
-         * UI stub — functional logic to be implemented in a future thread.
+         * Shows monthly revenue from Payments table (Status = "Paid").
+         * Groups by month/year, sums AmountDue per group.
          */
-        public IActionResult RevenueReport()
+        public async Task<IActionResult> RevenueReport()
         {
             var guard = GuardAdmin();
             if (guard != null) return guard;
             SetViewBag();
 
-            return View();
+            var revenueData = await _context.Payments
+                .Where(p => p.Status == "Paid" && p.PaidAt.HasValue)
+                .GroupBy(p => new
+                {
+                    Year = p.PaidAt!.Value.Year,
+                    Month = p.PaidAt!.Value.Month
+                })
+                .Select(g => new RevenueMonthItem
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    TotalRevenue = g.Sum(p => p.AmountDue),
+                    PaymentCount = g.Count()
+                })
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToListAsync();
+
+            ViewBag.RevenueData = revenueData;
+            ViewBag.GrandTotal = revenueData.Sum(x => x.TotalRevenue);
+            ViewBag.ActiveTab = "revenue";
+
+            return View("Reports");
         }
 
         /*
          * GroomingStyleReport — GET: /Reports/GroomingStyleReport
-         * Shows breakdown of reservations by grooming style (most to least popular).
-         * UI stub — functional logic to be implemented in a future thread.
+         * Ranks grooming styles by total number of reservations (most to least).
          */
-        public IActionResult GroomingStyleReport()
+        public async Task<IActionResult> GroomingStyleReport()
         {
             var guard = GuardAdmin();
             if (guard != null) return guard;
             SetViewBag();
 
-            return View();
-        }
+            var styleData = await _context.Reservations
+                .GroupBy(r => r.GroomingStyle)
+                .Select(g => new GroomingStyleItem
+                {
+                    GroomingStyle = g.Key,
+                    ReservationCount = g.Count()
+                })
+                .OrderByDescending(x => x.ReservationCount)
+                .ToListAsync();
 
-        /*
-         * PaymentReport — GET: /Reports/PaymentReport
-         * Shows payment records including reference numbers and receipt status.
-         * UI stub — functional logic to be implemented in a future thread.
-         */
-        public IActionResult PaymentReport()
-        {
-            var guard = GuardAdmin();
-            if (guard != null) return guard;
-            SetViewBag();
+            // Assign rank after fetch
+            int rank = 1;
+            foreach (var item in styleData)
+                item.Rank = rank++;
 
-            return View();
+            ViewBag.StyleData = styleData;
+            ViewBag.ActiveTab = "grooming";
+
+            return View("Reports");
         }
 
         /*
          * MonthlySummaryReport — GET: /Reports/MonthlySummaryReport
-         * Shows a month-by-month summary of new customers and approved bookings.
-         * UI stub — functional logic to be implemented in a future thread.
+         * Month-by-month summary: new customers, total reservations,
+         * approved reservations, and revenue for that month.
          */
-        public IActionResult MonthlySummaryReport()
+        public async Task<IActionResult> MonthlySummaryReport()
         {
             var guard = GuardAdmin();
             if (guard != null) return guard;
             SetViewBag();
 
-            return View();
+            // Group reservations by month
+            var reservationGroups = await _context.Reservations
+                .GroupBy(r => new { r.ReservationDate.Year, r.ReservationDate.Month })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    Total = g.Count(),
+                    Approved = g.Count(r => r.Status == "Approved")
+                })
+                .ToListAsync();
+
+            // Group paid revenue by month
+            var revenueGroups = await _context.Payments
+                .Where(p => p.Status == "Paid" && p.PaidAt.HasValue)
+                .GroupBy(p => new
+                {
+                    Year = p.PaidAt!.Value.Year,
+                    Month = p.PaidAt!.Value.Month
+                })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    Revenue = g.Sum(p => p.AmountDue)
+                })
+                .ToListAsync();
+
+            // Group new customers by month
+            var customerGroups = await _context.Customers
+                .GroupBy(c => new { c.DateCreated.Year, c.DateCreated.Month })
+                .Select(g => new
+                {
+                    g.Key.Year,
+                    g.Key.Month,
+                    NewCustomers = g.Count()
+                })
+                .ToListAsync();
+
+            // Merge all groups by year/month
+            var allMonths = reservationGroups
+                .Select(r => new { r.Year, r.Month })
+                .Union(revenueGroups.Select(r => new { r.Year, r.Month }))
+                .Union(customerGroups.Select(c => new { c.Year, c.Month }))
+                .Distinct()
+                .OrderByDescending(x => x.Year)
+                .ThenByDescending(x => x.Month)
+                .ToList();
+
+            var summaryData = allMonths.Select(m => new MonthlySummaryItem
+            {
+                Year = m.Year,
+                Month = m.Month,
+                NewCustomers = customerGroups
+                                    .FirstOrDefault(c => c.Year == m.Year && c.Month == m.Month)
+                                    ?.NewCustomers ?? 0,
+                TotalReservations = reservationGroups
+                                    .FirstOrDefault(r => r.Year == m.Year && r.Month == m.Month)
+                                    ?.Total ?? 0,
+                ApprovedReservations = reservationGroups
+                                    .FirstOrDefault(r => r.Year == m.Year && r.Month == m.Month)
+                                    ?.Approved ?? 0,
+                Revenue = revenueGroups
+                                    .FirstOrDefault(r => r.Year == m.Year && r.Month == m.Month)
+                                    ?.Revenue ?? 0
+            }).ToList();
+
+            ViewBag.SummaryData = summaryData;
+            ViewBag.ActiveTab = "monthly";
+
+            return View("Reports");
         }
+    }
+
+    // ─── View Models ────────────────────────────────────────────────────────────
+
+    public class RevenueMonthItem
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int PaymentCount { get; set; }
+        public string MonthName => new DateTime(Year, Month, 1).ToString("MMMM yyyy");
+    }
+
+    public class GroomingStyleItem
+    {
+        public int Rank { get; set; }
+        public string GroomingStyle { get; set; } = string.Empty;
+        public int ReservationCount { get; set; }
+    }
+
+    public class MonthlySummaryItem
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int NewCustomers { get; set; }
+        public int TotalReservations { get; set; }
+        public int ApprovedReservations { get; set; }
+        public decimal Revenue { get; set; }
+        public string MonthName => new DateTime(Year, Month, 1).ToString("MMMM yyyy");
     }
 }

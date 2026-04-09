@@ -3,6 +3,8 @@
  * Login page for LuxeGroom.
  * Two-column layout — hero image on the left, login form on the right.
  * Handles username and password input, error display, and password visibility toggle.
+ * Updated in Thread 4.3: Added anti-back/forward navigation script after logout.
+ * Updated in Thread 4.3.1: Added back arrow button navigating to Landing Page.
  *@
 
 @* Bind the view to the LoginViewModel *@
@@ -25,6 +27,35 @@
     <link rel="stylesheet" href="~/css/fonts.css" />
     @* Login page styles *@
     <link rel="stylesheet" href="~/css/auth/login.css" />
+
+    <style>
+        /* Back button — top-left of the form panel */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #7a7974;
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s ease;
+            letter-spacing: 0.01em;
+        }
+
+            .back-button:hover {
+                color: #28251d;
+            }
+
+            .back-button .back-icon {
+                font-size: 1.1rem;
+                transition: transform 0.2s ease;
+            }
+
+            .back-button:hover .back-icon {
+                transform: translateX(-3px);
+            }
+    </style>
 </head>
 <body>
     @* Two-column layout — hero left, form right *@
@@ -48,6 +79,12 @@
         @* Right form panel *@
         <div class="form-section">
             <div class="form-wrapper">
+
+                @* Back button — navigates to Landing Page *@
+                <a asp-action="LandingPage" asp-controller="Public" class="back-button">
+                    <span class="material-symbols-outlined back-icon">arrow_back</span>
+                    Back to Home
+                </a>
 
                 @* Page heading and subtitle *@
                 <header class="header">
@@ -125,6 +162,14 @@
             // Swap eye icon between show and hide image
             icon.src = isPassword ? '/images/hide.png' : '/images/show.png';
         }
+
+        // Prevent back/forward navigation to authenticated pages after logout
+        // Pushes the current login URL into the browser history stack,
+        // and re-pushes it every time the user tries to navigate away via back/forward
+        history.pushState(null, '', location.href);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, '', location.href);
+        });
     </script>
 </body>
 </html>

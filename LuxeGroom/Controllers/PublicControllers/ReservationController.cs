@@ -3,12 +3,17 @@
  * Handles the public reservation form submission from the landing page.
  * Saves new reservation with Status = "Pending".
  * Updated in Thread 3.7: Added PetSize to reservation entity.
+ * Updated in Thread 4.2: Block duplicate emails from Reservations and Users tables.
+ * Updated in Thread 4.3.1: Server-side validation for PH phone format and date range (1–2 days).
+ * Updated in Thread 4.3.2: Date validation now uses PH local time (UTC+8) to avoid timezone offset.
  */
 
 using LuxeGroom.Data;
 using LuxeGroom.Data.Generated;
 using LuxeGroom.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace LuxeGroom.Controllers.PublicControllers
 {
@@ -33,6 +38,47 @@ namespace LuxeGroom.Controllers.PublicControllers
                 string.IsNullOrWhiteSpace(model.Email))
             {
                 TempData["ReservationError"] = "All fields are required.";
+                return Redirect("/#reservation");
+            }
+
+            // 1) Validate Philippine mobile number format: 09XXXXXXXXX
+            var phoneRegex = new Regex(@"^09\d{9}$");
+            if (!phoneRegex.IsMatch(model.PhoneNumber.Trim()))
+            {
+                TempData["ReservationError"] = "Please enter a valid Philippine mobile number (e.g. 09XXXXXXXXX).";
+                return Redirect("/#reservation");
+            }
+
+            // 2) Validate reservation date using PH local time (UTC+8) to avoid server timezone offset
+            var phTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time");
+            var phToday = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, phTimeZone).Date;
+
+            var minDate = phToday.AddDays(1);
+            var maxDate = phToday.AddDays(2);
+
+            if (model.ReservationDate < minDate || model.ReservationDate > maxDate)
+            {
+                TempData["ReservationError"] = $"Reservation date must be between {minDate:MMMM d, yyyy} and {maxDate:MMMM d, yyyy}.";
+                return Redirect("/#reservation");
+            }
+
+            // 3) Block email already in Users table (Admin/Staff)
+            bool emailInUsers = _context.Users
+                .Any(u => u.Gmail.ToLower() == model.Email.ToLower().Trim());
+
+            if (emailInUsers)
+            {
+                TempData["ReservationError"] = "This email is already in use. Please use a different email.";
+                return Redirect("/#reservation");
+            }
+
+            // 4) Block email already in Reservations table (existing customer reservation)
+            bool emailInReservations = _context.Reservations
+                .Any(r => r.Email.ToLower() == model.Email.ToLower().Trim());
+
+            if (emailInReservations)
+            {
+                TempData["ReservationError"] = "You already have an existing reservation with this email. Please log in to your Customer Portal.";
                 return Redirect("/#reservation");
             }
 

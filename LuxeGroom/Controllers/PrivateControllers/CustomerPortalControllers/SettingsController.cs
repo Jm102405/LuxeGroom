@@ -2,7 +2,8 @@
  * SettingsController.cs
  * Handles the Customer Portal Settings page for LuxeGroom.
  * Extracted in Thread 3.9 from CustomerPortalController.cs.
- * GET: /Settings — shows account settings
+ * Updated in Thread 4.3: View Only — loads customer profile from Customers table.
+ * GET: /Settings — shows account info (read-only)
  */
 
 using LuxeGroom.Data;
@@ -43,6 +44,20 @@ namespace LuxeGroom.Controllers.PrivateControllers.CustomerPortalControllers
 
             SetViewBagSession();
             ViewBag.Title = "Settings";
+
+            var username = HttpContext.Session.GetString("Username");
+
+            // Load customer profile from Customers table
+            var customer = _context.Customers
+                .FirstOrDefault(c => c.Username == username);
+
+            if (customer != null)
+            {
+                ViewBag.FirstName = customer.Firstname;
+                ViewBag.Email = customer.Email;
+                ViewBag.Phone = customer.Phone;
+            }
+
             return View("~/Views/Private/CustomerPortal/Settings.cshtml");
         }
     }

@@ -2,6 +2,7 @@
  * Settings.cshtml
  * Customer Portal — Settings page.
  * Created in Thread 3.6.
+ * Updated in Thread 4.3: View Only — displays customer profile info from ViewBag.
  *@
 
 @{
@@ -13,10 +14,37 @@
 <link rel="stylesheet" href="~/css/private/customerportal/settings.css" />
 
 <div class="page-header">
-    <h1 class="page-title">Settings</h1>
-    <p class="page-subtitle">Update your personal information.</p>
+    <h1 class="page-title">Account Settings</h1>
+    <p class="page-subtitle">Your account details and profile information.</p>
 </div>
 
-<div class="portal-card">
-    <p class="portal-text">Settings form coming soon.</p>
+@* ===== PROFILE CARD ===== *@
+<div class="portal-card settings-card">
+
+    <div class="settings-section-header">
+        <span class="material-symbols-outlined settings-section-icon">person</span>
+        <div>
+            <h2 class="settings-section-title">Profile Information</h2>
+            <p class="settings-section-subtitle">Your personal details on file with LuxeGroom.</p>
+        </div>
+    </div>
+
+    <div class="settings-divider"></div>
+
+    <div class="settings-grid">
+        </div>
+
+        <div class="settings-field">
+            <span class="settings-field-label">Username</span>
+            <span class="settings-field-value">@(ViewBag.Username ?? "—")</span>
+        </div>
+
+        <div class="settings-field">
+            <span class="settings-field-label">Role</span>
+            <span class="settings-field-value">@(ViewBag.Role ?? "—")</span>
+        </div>
+        </div>
+
+    </div>
+
 </div>

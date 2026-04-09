@@ -1,56 +1,154 @@
 ﻿/*
  * mybookings.css
- * Styles for the Customer Portal MyBookings page.
- * Extracted in Thread 3.9 from customer-portal.css.
+ * Styles for the Customer Portal My Bookings page.
+ * Created in Thread 4.2. Follows payment.css theme.
+ * Updated in Thread 4.2c: Simplified layout, no payment section.
  */
 
-/* ===== HISTORY TABLE ===== */
+/* ===== EMPTY STATE ===== */
 
-.history-table {
-    margin-top: 14px;
+.empty-bookings {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-size: 14px;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 24px;
+    text-align: center;
 }
 
-.history-header {
-    display: grid;
-    grid-template-columns: 1.1fr 1.4fr 1fr 0.8fr;
-    gap: 12px;
+.empty-icon {
+    font-size: 48px;
+    color: #374151;
+    margin-bottom: 14px;
+}
+
+.empty-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e5e7eb;
+    margin-bottom: 6px;
+}
+
+.empty-text {
+    font-size: 13px;
+    color: #6b7280;
+    max-width: 280px;
+    line-height: 1.6;
+}
+
+/* ===== BOOKINGS LIST ===== */
+
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ===== BOOKING CARD ===== */
+
+.booking-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Card Header ── */
+.booking-card-header {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.booking-pet-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.booking-pet-icon {
+    font-size: 22px;
+    color: #C5A059;
+    flex-shrink: 0;
+}
+
+.booking-pet-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e5e7eb;
+    margin: 0 0 2px 0;
+}
+
+.booking-res-id {
+    font-size: 11px;
+    color: #4b5563;
+    margin: 0;
+    letter-spacing: 0.04em;
+}
+
+/* ===== STATUS BADGES ===== */
+
+.booking-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.badge--approved {
+    background: rgba(17, 50, 212, 0.15);
+    color: #6b8cff;
+}
+
+.badge--pending {
+    background: rgba(255, 193, 7, 0.15);
+    color: #FFC107;
+}
+
+.badge--completed {
+    background: rgba(197, 160, 89, 0.15);
+    color: #C5A059;
+}
+
+.badge--cancelled {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+}
+
+.badge--default {
+    background: transparent;
+    color: #4b5563;
+}
+
+/* ===== DETAILS GRID ===== */
+
+.booking-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.booking-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.booking-detail-label {
+    font-size: 11px;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.booking-detail-value {
+    font-size: 13px;
     font-weight: 600;
     color: #e5e7eb;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 8px;
-}
-
-.history-row {
-    display: grid;
-    grid-template-columns: 1.1fr 1.4fr 1fr 0.8fr;
-    gap: 12px;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(31, 41, 55, 0.9);
-}
-
-/* ===== RESPONSIVE ===== */
-
-@media (max-width: 992px) {
-    .history-header,
-    .history-row {
-        grid-template-columns: 1.2fr 1.5fr 1fr;
-    }
-
-        .history-header span:last-child,
-        .history-row span:last-child {
-            display: none;
-        }
-}
-
-@media (max-width: 640px) {
-    .history-header,
-    .history-row {
-        grid-template-columns: 1.3fr 1.2fr;
-    }
 }

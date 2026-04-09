@@ -1,0 +1,233 @@
+﻿@*
+ * Reports.cshtml
+ * Single unified Reports page for LuxeGroom admin.
+ * Tabs: Revenue Report | Grooming Style Report | Monthly Summary
+ * Updated in Thread 4.3.2: Built from scratch — replaced stub views.
+ * Updated in Thread 4.3.2: Added Print button and print styles.
+ * Located at: Views/Reports/Reports.cshtml
+ *@
+
+@{
+    Layout = "/Views/Private/_Layout.cshtml";
+    ViewBag.Title = "Reports";
+
+    string activeTab = ViewBag.ActiveTab ?? "revenue";
+
+    var revenueData = ViewBag.RevenueData as List<LuxeGroom.Controllers.Reports.RevenueMonthItem> ?? new();
+    var styleData = ViewBag.StyleData as List<LuxeGroom.Controllers.Reports.GroomingStyleItem> ?? new();
+    var summaryData = ViewBag.SummaryData as List<LuxeGroom.Controllers.Reports.MonthlySummaryItem> ?? new();
+
+    decimal grandTotal = ViewBag.GrandTotal is decimal gt ? gt : 0m;
+}
+
+<link rel="stylesheet" href="~/css/private/reports.css" />
+
+@* ── Page Header with Print Button ── *@
+<header class="dashboard-header">
+    <div class="report-header-row">
+        <div>
+            <h1 class="welcome-title">Reports</h1>
+            <p class="welcome-subtitle">View revenue, grooming trends, and monthly performance summaries.</p>
+        </div>
+        @* Print button — triggers browser print dialog *@
+        <button class="print-btn" onclick="window.print()">
+            🖨️ Print Report
+        </button>
+    </div>
+</header>
+
+@* ── Tab Navigation ── *@
+<div class="report-tabs">
+    <a href="/Reports/RevenueReport"
+       class="report-tab @(activeTab == "revenue" ? "active" : "")">
+        💰 Revenue Report
+    </a>
+    <a href="/Reports/GroomingStyleReport"
+       class="report-tab @(activeTab == "grooming" ? "active" : "")">
+        ✂️ Grooming Style Report
+    </a>
+    <a href="/Reports/MonthlySummaryReport"
+       class="report-tab @(activeTab == "monthly" ? "active" : "")">
+        📅 Monthly Summary
+    </a>
+</div>
+
+<div class="report-body">
+
+    @* ══════════════════════════════════════════════════════════════
+       TAB 1 — REVENUE REPORT
+       ══════════════════════════════════════════════════════════════ *@
+    @if (activeTab == "revenue")
+    {
+        @* Grand total summary cards *@
+        <div class="report-stat-row">
+            <div class="report-stat-card">
+                <p class="report-stat-label">Total Revenue (All Time)</p>
+                <h2 class="report-stat-value">₱@grandTotal.ToString("N0")</h2>
+            </div>
+            <div class="report-stat-card">
+                <p class="report-stat-label">Months with Payments</p>
+                <h2 class="report-stat-value">@revenueData.Count</h2>
+            </div>
+        </div>
+
+        @if (revenueData.Any())
+        {
+            <div class="activity-card report-table-card">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Payments Collected</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in revenueData)
+                        {
+                            <tr>
+                                <td>@row.MonthName</td>
+                                <td>@row.PaymentCount</td>
+                                <td class="revenue-amount">₱@row.TotalRevenue.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="report-empty">
+                <p>No paid payments recorded yet.</p>
+            </div>
+        }
+    }
+
+    @* ══════════════════════════════════════════════════════════════
+       TAB 2 — GROOMING STYLE REPORT
+       ══════════════════════════════════════════════════════════════ *@
+    @if (activeTab == "grooming")
+    {
+        @if (styleData.Any())
+        {
+            @* Top style highlight cards *@
+            <div class="report-stat-row">
+                <div class="report-stat-card">
+                    <p class="report-stat-label">🏆 Most Popular Style</p>
+                    <h2 class="report-stat-value">@styleData.First().GroomingStyle</h2>
+                </div>
+                <div class="report-stat-card">
+                    <p class="report-stat-label">Total Reservations</p>
+                    <h2 class="report-stat-value">@styleData.Sum(s => s.ReservationCount)</h2>
+                </div>
+            </div>
+
+            <div class="activity-card report-table-card">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Grooming Style</th>
+                            <th>Reservations</th>
+                            <th>Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int totalReservations = styleData.Sum(s => s.ReservationCount);
+                        }
+                        @foreach (var row in styleData)
+                        {
+                            double pct = totalReservations > 0
+                            ? Math.Round((double)row.ReservationCount / totalReservations * 100, 1)
+                            : 0;
+
+                            string rankBadge = row.Rank == 1 ? "🥇"
+                            : row.Rank == 2 ? "🥈"
+                            : row.Rank == 3 ? "🥉"
+                            : $"#{row.Rank}";
+
+                            <tr>
+                                <td class="rank-cell">@rankBadge</td>
+                                <td>@row.GroomingStyle</td>
+                                <td>@row.ReservationCount</td>
+                                <td>
+                                    <div class="progress-bar-wrap">
+                                        <div class="progress-bar-fill" style="width: @pct%"></div>
+                                        <span class="progress-bar-label">@pct%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="report-empty">
+                <p>No reservation data available yet.</p>
+            </div>
+        }
+    }
+
+    @* ══════════════════════════════════════════════════════════════
+       TAB 3 — MONTHLY SUMMARY
+       ══════════════════════════════════════════════════════════════ *@
+    @if (activeTab == "monthly")
+    {
+        @if (summaryData.Any())
+        {
+            @* Summary highlight cards *@
+            <div class="report-stat-row">
+                <div class="report-stat-card">
+                    <p class="report-stat-label">Total Revenue (All Time)</p>
+                    <h2 class="report-stat-value">₱@summaryData.Sum(s => s.Revenue).ToString("N0")</h2>
+                </div>
+                <div class="report-stat-card">
+                    <p class="report-stat-label">Total Approved Reservations</p>
+                    <h2 class="report-stat-value">@summaryData.Sum(s => s.ApprovedReservations)</h2>
+                </div>
+                <div class="report-stat-card">
+                    <p class="report-stat-label">Total New Customers</p>
+                    <h2 class="report-stat-value">@summaryData.Sum(s => s.NewCustomers)</h2>
+                </div>
+            </div>
+
+            <div class="activity-card report-table-card">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>New Customers</th>
+                            <th>Total Reservations</th>
+                            <th>Approved</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in summaryData)
+                        {
+                            <tr>
+                                <td>@row.MonthName</td>
+                                <td>@row.NewCustomers</td>
+                                <td>@row.TotalReservations</td>
+                                <td>
+                                    <span class="status-badge completed">@row.ApprovedReservations</span>
+                                </td>
+                                <td class="revenue-amount">₱@row.Revenue.ToString("N0")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="report-empty">
+                <p>No monthly data available yet.</p>
+            </div>
+        }
+    }
+
+</div>

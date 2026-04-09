@@ -1,0 +1,317 @@
+﻿/*
+ * reports.css
+ * Styles for the Reports page in LuxeGroom.
+ * Covers tab navigation, stat cards, tables, progress bars,
+ * print button, empty states, and print media styles.
+ * Created in Thread 4.3.2.
+ * Updated in Thread 4.3.2: Added print button + @media print styles.
+ * Used by Views/Reports/Reports.cshtml.
+ */
+
+
+/* ── Page Header Row ── */
+.report-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+/* ── Print Button ── */
+.print-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    color: #e5e7eb;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+    .print-btn:hover {
+        background: #252d3d;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+
+
+/* ── Tab Navigation ── */
+.report-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #2d3748;
+    padding-bottom: 0;
+}
+
+.report-tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+    margin-bottom: -1px;
+    white-space: nowrap;
+}
+
+    .report-tab:hover {
+        color: #e5e7eb;
+    }
+
+    .report-tab.active {
+        color: #3b82f6;
+        border-bottom: 2px solid #3b82f6;
+    }
+
+
+/* ── Report Body ── */
+.report-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* ── Stat Cards Row ── */
+.report-stat-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.report-stat-card {
+    flex: 1;
+    min-width: 180px;
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 12px;
+    padding: 20px 24px;
+}
+
+.report-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.report-stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #f1f5f9;
+    line-height: 1;
+}
+
+
+/* ── Table Card ── */
+.report-table-card {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+
+/* ── Table ── */
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+    .report-table thead tr {
+        background: #0f1419;
+        border-bottom: 1px solid #2d3748;
+    }
+
+    .report-table th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6b7280;
+    }
+
+    .report-table td {
+        padding: 14px 20px;
+        color: #d1d5db;
+        border-bottom: 1px solid #1e2533;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .report-table tbody tr:hover {
+        background: #1e2533;
+    }
+
+/* Revenue amount — gold accent */
+.revenue-amount {
+    color: #C5A059 !important;
+    font-weight: 600;
+}
+
+/* Rank cell — centered medal */
+.rank-cell {
+    font-size: 18px;
+    text-align: center;
+    width: 60px;
+}
+
+
+/* ── Progress Bar ── */
+.progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar-fill {
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 999px;
+    min-width: 4px;
+    transition: width 0.4s ease;
+}
+
+.progress-bar-label {
+    font-size: 12px;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+
+/* ── Empty State ── */
+.report-empty {
+    text-align: center;
+    padding: 60px 40px;
+    color: #64748b;
+    font-size: 14px;
+    background: #1a1f2e;
+    border-radius: 12px;
+    border: 1px solid #2d3748;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   PRINT STYLES
+   Hides sidebar, tabs, and print button.
+   Shows only the active report table cleanly on paper.
+   ══════════════════════════════════════════════════════════════ */
+@media print {
+
+    /* Hide non-essential UI */
+    .sidebar,
+    .report-tabs,
+    .print-btn,
+    .logout-section,
+    .logout-modal-overlay {
+        display: none !important;
+    }
+
+    /* Full width layout — remove sidebar offset */
+    .dashboard-container {
+        display: block !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+
+    /* White background for paper */
+    body,
+    .report-body,
+    .activity-card,
+    .report-table-card,
+    .report-stat-card {
+        background: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        border-color: #cccccc !important;
+    }
+
+    /* Readable table text */
+    .report-table th,
+    .report-table td {
+        color: #000000 !important;
+        border-bottom: 1px solid #dddddd !important;
+    }
+
+    .report-table thead tr {
+        background: #f3f4f6 !important;
+    }
+
+    /* Stat cards */
+    .report-stat-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        margin-bottom: 20px !important;
+    }
+
+    .report-stat-label {
+        color: #555555 !important;
+    }
+
+    .report-stat-value {
+        color: #000000 !important;
+    }
+
+    /* Revenue gold → black for print */
+    .revenue-amount {
+        color: #000000 !important;
+    }
+
+    /* Progress bar on print */
+    .progress-bar-fill {
+        background: #000000 !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .progress-bar-label {
+        color: #000000 !important;
+    }
+
+    /* Page title */
+    .welcome-title {
+        color: #000000 !important;
+        font-size: 22px !important;
+    }
+
+    .welcome-subtitle {
+        color: #555555 !important;
+    }
+
+    /* Avoid row splits across pages */
+    .report-table tr {
+        page-break-inside: avoid;
+    }
+
+    /* LuxeGroom print label above title */
+    .dashboard-header::before {
+        content: "LuxeGroom — Admin Report";
+        display: block;
+        font-size: 11px;
+        color: #888888;
+        margin-bottom: 4px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+}

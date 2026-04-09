@@ -2,6 +2,7 @@
  * LoginController.cs
  * Handles Login and Logout for LuxeGroom.
  * Updated in Thread 3.7: Added role-based redirect after login.
+ * Updated in Thread 4.3: Logout now clears cache headers to prevent back/forward navigation.
  */
 
 using LuxeGroom.Data;
@@ -81,6 +82,12 @@ namespace LuxeGroom.Controllers.Auth
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+
+            // Prevent browser from restoring cached authenticated pages
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
             return RedirectToAction("Index", "Login");
         }
     }

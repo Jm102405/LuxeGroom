@@ -4,6 +4,9 @@
  * Updated in Thread 3.7: Payment action now loads unpaid/pending payment data.
  *                         Added UploadPayment POST action for receipt submission.
  * Updated in Thread 4.0: Added Reserve POST action to save reservation to database.
+ * Updated in Thread 4.2d: MyBookings now redirects to MyBookingsController.Index().
+ * Updated in Thread 4.2e: Fixed duplicate PRIMARY KEY on Reserve — uses Max ID instead of Count.
+ * Updated in Thread 4.2f: Block reserve if customer has existing Pending or Approved reservation.
  */
 
 using LuxeGroom.Data;
@@ -166,9 +169,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
             if (!IsCustomerLoggedIn())
                 return RedirectToAction("Index", "Login");
 
-            SetViewBagSession();
-            ViewBag.Title = "My Bookings";
-            return View("~/Views/Private/CustomerPortal/MyBookings.cshtml");
+            return RedirectToAction("Index", "MyBookings");
         }
 
         // ─── Reserve GET ────────────────────────────────────────────────
@@ -208,8 +209,29 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 return RedirectToAction("Reserve");
             }
 
-            int count = _context.Reservations.Count();
-            string newId = $"RES-{count + 1}";
+            // Block if customer already has a Pending or Approved reservation
+            bool hasActiveReservation = _context.Reservations
+                .Any(r => r.Email == customer.Email &&
+                          (r.Status == "Pending" || r.Status == "Approved"));
+
+            if (hasActiveReservation)
+            {
+                TempData["Error"] = "You already have an active reservation. Please wait for it to be completed before making a new one.";
+                return RedirectToAction("Reserve");
+            }
+
+            // Fix: extract max numeric ID to avoid duplicate key on gaps/deletions
+            var lastId = _context.Reservations
+                .AsEnumerable()
+                .Select(r =>
+                {
+                    var parts = r.Id.Split('-');
+                    return parts.Length == 2 && int.TryParse(parts[1], out int n) ? n : 0;
+                })
+                .DefaultIfEmpty(0)
+                .Max();
+
+            string newId = $"RES-{lastId + 1}";
 
             var reservation = new Reservation
             {

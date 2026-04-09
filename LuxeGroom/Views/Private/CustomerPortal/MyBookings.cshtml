@@ -1,22 +1,84 @@
 ﻿@*
  * MyBookings.cshtml
  * Customer Portal — Booking history page.
- * Created in Thread 3.6.
+ * Updated in Thread 4.2c: Simplified display — pet_name, pet_size,
+ * grooming_style, reservation_date, status only.
+ * Updated in Thread 4.2d: Added debug username display for session check.
  *@
+
+@model LuxeGroom.Models.CustomerMyBookingsViewModel
 
 @{
     Layout = "~/Views/Private/CustomerPortal/_Layout.cshtml";
     ViewBag.Title = "My Bookings";
+    var bookings = Model?.Bookings ?? new List<LuxeGroom.Models.BookingItemViewModel>();
 }
 
 <link rel="stylesheet" href="~/css/private/customerportal/_base.css" />
-<link rel="stylesheet" href="~/css/private/customerportal/settings.csss" />
+<link rel="stylesheet" href="~/css/private/customerportal/mybookings.css" />
 
 <div class="page-header">
     <h1 class="page-title">My Bookings</h1>
-    <p class="page-subtitle">View your reservation history.</p>
+    <p class="page-subtitle">View your reservation history and payment status.</p>
 </div>
 
-<div class="portal-card">
-    <p class="portal-text">No bookings found.</p>
-</div>
+@if (bookings.Count == 0)
+{
+    <div class="portal-card empty-bookings">
+        <span class="material-symbols-outlined empty-icon">calendar_month</span>
+        <p class="empty-title">No bookings yet</p>
+        <p class="empty-text">Your reservation history will appear here once you have made a booking.</p>
+    </div>
+}
+else
+{
+    <div class="bookings-list">
+        @foreach (var booking in bookings)
+        {
+            <div class="portal-card booking-card">
+
+                @* ── Header: Pet Name + Status Badge ── *@
+                <div class="booking-card-header">
+                    <div class="booking-pet-info">
+                        <span class="material-symbols-outlined booking-pet-icon">pets</span>
+                        <div>
+                            <p class="booking-pet-name">@booking.PetName</p>
+                            <p class="booking-res-id">@booking.ReservationId</p>
+                        </div>
+                    </div>
+                    <span class="booking-status-badge
+                                @(booking.Status == "Approved" ? "badge--approved" :
+                                                    booking.Status == "Pending" ? "badge--pending" :
+                                                    booking.Status == "Completed" ? "badge--completed" :
+                                                    booking.Status == "Cancelled" ? "badge--cancelled" :
+                                                    "badge--default")">
+                @booking.Status
+            </span>
+        </div>
+
+                @* ── Details Grid ── *@
+                <div class="booking-details-grid">
+                    <div class="booking-detail-item">
+                        <span class="booking-detail-label">Pet Size</span>
+                        <span class="booking-detail-value">@booking.PetSize</span>
+                    </div>
+                    <div class="booking-detail-item">
+                        <span class="booking-detail-label">Grooming Style</span>
+                        <span class="booking-detail-value">@booking.GroomingStyle</span>
+                    </div>
+                    <div class="booking-detail-item">
+                        <span class="booking-detail-label">Schedule</span>
+                        <span class="booking-detail-value">
+                            @booking.ReservationDate.ToString("MMMM dd, yyyy")
+                        </span>
+                    </div>
+                    <div class="booking-detail-item">
+                        <span class="booking-detail-label">Status</span>
+                        <span class="booking-detail-value">@booking.Status</span>
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+}
