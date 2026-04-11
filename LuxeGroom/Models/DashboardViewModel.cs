@@ -1,7 +1,6 @@
 ﻿/*
  * DashboardViewModel.cs
  * ViewModel for the Admin/Staff Dashboard.
- * Updated in Thread 4.3.2: EstimatedRevenueThisMonth replaced with
  *   RevenueThisMonth — real sum of paid Payment.AmountDue for current month.
  */
 

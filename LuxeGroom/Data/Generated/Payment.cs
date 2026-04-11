@@ -1,8 +1,6 @@
 ﻿/*
  * Payment.cs
  * EF Core entity for the Payments table in LuxeGroom.
- * Created in Thread 3.7.
- * Updated in Thread 3.7b: Added ManagedBy column (staff/admin who approved payment).
  */
 
 using System.ComponentModel.DataAnnotations;

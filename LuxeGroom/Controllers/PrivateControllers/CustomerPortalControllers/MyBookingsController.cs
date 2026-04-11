@@ -1,9 +1,6 @@
 ﻿/*
  * MyBookingsController.cs
  * Handles the Customer Portal My Bookings page for LuxeGroom.
- * Extracted in Thread 3.9 from CustomerPortalController.cs.
- * Updated in Thread 4.2c: Simplified — looks up reservations by owner_name == session username.
- * Updated in Thread 4.2d: Fixed case sensitivity using OrdinalIgnoreCase + debug session check.
  * GET: /MyBookings — shows all reservations where owner_name matches logged-in username
  */
 

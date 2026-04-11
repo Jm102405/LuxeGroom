@@ -4,6 +4,10 @@
  * Tabs: Revenue Report | Grooming Style Report | Monthly Summary
  * Updated in Thread 4.3.2: Built from scratch — replaced stub views.
  * Updated in Thread 4.3.2: Added Print button and print styles.
+ * Updated in Thread 4.4: Updated namespace cast to LuxeGroom.Models.
+ * Updated in Thread 4.4 Step 2: Added drill-down detail modal per tab.
+ * Updated in Thread 4.4 Fix 2: Grooming Style stat label updated to paid only.
+ * Updated in Thread 4.4 Step 3: Added date range filter to all 3 tabs.
  * Located at: Views/Reports/Reports.cshtml
  *@
 
@@ -13,23 +17,27 @@
 
     string activeTab = ViewBag.ActiveTab ?? "revenue";
 
-    var revenueData = ViewBag.RevenueData as List<LuxeGroom.Controllers.Reports.RevenueMonthItem> ?? new();
-    var styleData = ViewBag.StyleData as List<LuxeGroom.Controllers.Reports.GroomingStyleItem> ?? new();
-    var summaryData = ViewBag.SummaryData as List<LuxeGroom.Controllers.Reports.MonthlySummaryItem> ?? new();
+    var revenueData = ViewBag.RevenueData as List<LuxeGroom.Models.RevenueMonthItem> ?? new();
+    var styleData = ViewBag.StyleData as List<LuxeGroom.Models.GroomingStyleItem> ?? new();
+    var summaryData = ViewBag.SummaryData as List<LuxeGroom.Models.MonthlySummaryItem> ?? new();
 
     decimal grandTotal = ViewBag.GrandTotal is decimal gt ? gt : 0m;
+
+    string filterFrom = ViewBag.FilterFrom ?? "";
+    string filterTo = ViewBag.FilterTo ?? "";
+
+    bool isFiltered = !string.IsNullOrEmpty(filterFrom) || !string.IsNullOrEmpty(filterTo);
 }
 
 <link rel="stylesheet" href="~/css/private/reports.css" />
 
-@* ── Page Header with Print Button ── *@
+@* ── Page Header ── *@
 <header class="dashboard-header">
     <div class="report-header-row">
         <div>
             <h1 class="welcome-title">Reports</h1>
             <p class="welcome-subtitle">View revenue, grooming trends, and monthly performance summaries.</p>
         </div>
-        @* Print button — triggers browser print dialog *@
         <button class="print-btn" onclick="window.print()">
             🖨️ Print Report
         </button>
@@ -59,10 +67,36 @@
        ══════════════════════════════════════════════════════════════ *@
     @if (activeTab == "revenue")
     {
-        @* Grand total summary cards *@
+        @* ── Date Range Filter ── *@
+        <form method="get" action="/Reports/RevenueReport" class="filter-bar">
+            <div class="filter-group">
+                <label class="filter-label">From</label>
+                <input type="month" name="from" value="@filterFrom" class="filter-input" />
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">To</label>
+                <input type="month" name="to" value="@filterTo" class="filter-input" />
+            </div>
+            <button type="submit" class="filter-btn">Apply</button>
+            @if (isFiltered)
+            {
+                <a href="/Reports/RevenueReport" class="filter-clear">✕ Clear</a>
+            }
+        </form>
+
+        @if (isFiltered)
+        {
+            <p class="filter-active-label">
+                📅 Showing:
+                @(!string.IsNullOrEmpty(filterFrom) ? DateTime.ParseExact(filterFrom, "yyyy-MM", null).ToString("MMMM yyyy") : "All time")
+                —
+                @(!string.IsNullOrEmpty(filterTo) ? DateTime.ParseExact(filterTo, "yyyy-MM", null).ToString("MMMM yyyy") : "Present")
+            </p>
+        }
+
         <div class="report-stat-row">
             <div class="report-stat-card">
-                <p class="report-stat-label">Total Revenue (All Time)</p>
+                <p class="report-stat-label">Total Revenue @(isFiltered ? "(Filtered)" : "(All Time)")</p>
                 <h2 class="report-stat-value">₱@grandTotal.ToString("N0")</h2>
             </div>
             <div class="report-stat-card">
@@ -80,15 +114,21 @@
                             <th>Month</th>
                             <th>Payments Collected</th>
                             <th>Revenue</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var row in revenueData)
                         {
-                            <tr>
+                            <tr class="report-row-clickable"
+                                data-year="@row.Year"
+                                data-month="@row.Month"
+                                data-label="@row.MonthName"
+                                onclick="openRevenueDetail(this)">
                                 <td>@row.MonthName</td>
                                 <td>@row.PaymentCount</td>
                                 <td class="revenue-amount">₱@row.TotalRevenue.ToString("N0")</td>
+                                <td class="detail-hint">View Details →</td>
                             </tr>
                         }
                     </tbody>
@@ -98,7 +138,7 @@
         else
         {
             <div class="report-empty">
-                <p>No paid payments recorded yet.</p>
+                <p>No paid payments recorded@(isFiltered ? " for the selected range." : " yet.")</p>
             </div>
         }
     }
@@ -108,16 +148,42 @@
        ══════════════════════════════════════════════════════════════ *@
     @if (activeTab == "grooming")
     {
+        @* ── Date Range Filter ── *@
+        <form method="get" action="/Reports/GroomingStyleReport" class="filter-bar">
+            <div class="filter-group">
+                <label class="filter-label">From</label>
+                <input type="date" name="from" value="@filterFrom" class="filter-input" />
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">To</label>
+                <input type="date" name="to" value="@filterTo" class="filter-input" />
+            </div>
+            <button type="submit" class="filter-btn">Apply</button>
+            @if (isFiltered)
+            {
+                <a href="/Reports/GroomingStyleReport" class="filter-clear">✕ Clear</a>
+            }
+        </form>
+
+        @if (isFiltered)
+        {
+            <p class="filter-active-label">
+                📅 Showing paid reservations from
+                @(!string.IsNullOrEmpty(filterFrom) ? DateTime.Parse(filterFrom).ToString("MMM dd, yyyy") : "all time")
+                —
+                @(!string.IsNullOrEmpty(filterTo) ? DateTime.Parse(filterTo).ToString("MMM dd, yyyy") : "present")
+            </p>
+        }
+
         @if (styleData.Any())
         {
-            @* Top style highlight cards *@
             <div class="report-stat-row">
                 <div class="report-stat-card">
                     <p class="report-stat-label">🏆 Most Popular Style</p>
                     <h2 class="report-stat-value">@styleData.First().GroomingStyle</h2>
                 </div>
                 <div class="report-stat-card">
-                    <p class="report-stat-label">Total Reservations</p>
+                    <p class="report-stat-label">Total Paid Reservations</p>
                     <h2 class="report-stat-value">@styleData.Sum(s => s.ReservationCount)</h2>
                 </div>
             </div>
@@ -128,8 +194,9 @@
                         <tr>
                             <th>Rank</th>
                             <th>Grooming Style</th>
-                            <th>Reservations</th>
+                            <th>Paid Reservations</th>
                             <th>Share</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -147,7 +214,12 @@
                             : row.Rank == 3 ? "🥉"
                             : $"#{row.Rank}";
 
-                            <tr>
+                            <tr class="report-row-clickable"
+                                data-style="@row.GroomingStyle"
+                                data-label="@row.GroomingStyle"
+                                data-from="@filterFrom"
+                                data-to="@filterTo"
+                                onclick="openGroomingDetail(this)">
                                 <td class="rank-cell">@rankBadge</td>
                                 <td>@row.GroomingStyle</td>
                                 <td>@row.ReservationCount</td>
@@ -157,6 +229,7 @@
                                         <span class="progress-bar-label">@pct%</span>
                                     </div>
                                 </td>
+                                <td class="detail-hint">View Details →</td>
                             </tr>
                         }
                     </tbody>
@@ -166,7 +239,7 @@
         else
         {
             <div class="report-empty">
-                <p>No reservation data available yet.</p>
+                <p>No paid reservation data available@(isFiltered ? " for the selected range." : " yet.")</p>
             </div>
         }
     }
@@ -176,12 +249,38 @@
        ══════════════════════════════════════════════════════════════ *@
     @if (activeTab == "monthly")
     {
+        @* ── Date Range Filter ── *@
+        <form method="get" action="/Reports/MonthlySummaryReport" class="filter-bar">
+            <div class="filter-group">
+                <label class="filter-label">From</label>
+                <input type="month" name="from" value="@filterFrom" class="filter-input" />
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">To</label>
+                <input type="month" name="to" value="@filterTo" class="filter-input" />
+            </div>
+            <button type="submit" class="filter-btn">Apply</button>
+            @if (isFiltered)
+            {
+                <a href="/Reports/MonthlySummaryReport" class="filter-clear">✕ Clear</a>
+            }
+        </form>
+
+        @if (isFiltered)
+        {
+            <p class="filter-active-label">
+                📅 Showing:
+                @(!string.IsNullOrEmpty(filterFrom) ? DateTime.ParseExact(filterFrom, "yyyy-MM", null).ToString("MMMM yyyy") : "All time")
+                —
+                @(!string.IsNullOrEmpty(filterTo) ? DateTime.ParseExact(filterTo, "yyyy-MM", null).ToString("MMMM yyyy") : "Present")
+            </p>
+        }
+
         @if (summaryData.Any())
         {
-            @* Summary highlight cards *@
             <div class="report-stat-row">
                 <div class="report-stat-card">
-                    <p class="report-stat-label">Total Revenue (All Time)</p>
+                    <p class="report-stat-label">Total Revenue @(isFiltered ? "(Filtered)" : "(All Time)")</p>
                     <h2 class="report-stat-value">₱@summaryData.Sum(s => s.Revenue).ToString("N0")</h2>
                 </div>
                 <div class="report-stat-card">
@@ -203,12 +302,17 @@
                             <th>Total Reservations</th>
                             <th>Approved</th>
                             <th>Revenue</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var row in summaryData)
                         {
-                            <tr>
+                            <tr class="report-row-clickable"
+                                data-year="@row.Year"
+                                data-month="@row.Month"
+                                data-label="@row.MonthName"
+                                onclick="openMonthlyDetail(this)">
                                 <td>@row.MonthName</td>
                                 <td>@row.NewCustomers</td>
                                 <td>@row.TotalReservations</td>
@@ -216,6 +320,7 @@
                                     <span class="status-badge completed">@row.ApprovedReservations</span>
                                 </td>
                                 <td class="revenue-amount">₱@row.Revenue.ToString("N0")</td>
+                                <td class="detail-hint">View Details →</td>
                             </tr>
                         }
                     </tbody>
@@ -225,9 +330,182 @@
         else
         {
             <div class="report-empty">
-                <p>No monthly data available yet.</p>
+                <p>No monthly data available@(isFiltered ? " for the selected range." : " yet.")</p>
             </div>
         }
     }
 
 </div>
+
+@* ── Shared Detail Modal ── *@
+<div class="detail-modal-overlay" id="detailModalOverlay" onclick="closeDetailModal()">
+    <div class="detail-modal" onclick="event.stopPropagation()">
+        <div class="detail-modal-header">
+            <h2 class="detail-modal-title" id="detailModalTitle">Details</h2>
+            <button class="detail-modal-close" onclick="closeDetailModal()">✕</button>
+        </div>
+        <div class="detail-modal-body" id="detailModalBody">
+            <p class="detail-loading">Loading...</p>
+        </div>
+        <div class="detail-modal-footer">
+            <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+            <button class="btn-close-modal" onclick="closeDetailModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openDetailModal(title) {
+            document.getElementById('detailModalTitle').textContent = title;
+            document.getElementById('detailModalBody').innerHTML = '<p class="detail-loading">Loading...</p>';
+            document.getElementById('detailModalOverlay').classList.add('active');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModalOverlay').classList.remove('active');
+        }
+
+        function renderError() {
+            document.getElementById('detailModalBody').innerHTML =
+                '<p class="detail-empty">Failed to load details. Please try again.</p>';
+        }
+
+        function renderEmpty() {
+            document.getElementById('detailModalBody').innerHTML =
+                '<p class="detail-empty">No records found for this selection.</p>';
+        }
+
+        // ── Revenue Detail ────────────────────────────────────────────
+        function openRevenueDetail(row) {
+            const year  = row.dataset.year;
+            const month = row.dataset.month;
+            const label = row.dataset.label;
+
+            openDetailModal('💰 Revenue — ' + label);
+
+            fetch(`/Reports/RevenueDetail?year=${year}&month=${month}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.length) { renderEmpty(); return; }
+
+                    let html = `
+                        <table class="report-table detail-table">
+                            <thead><tr>
+                                <th>Owner</th><th>Pet</th>
+                                <th>Grooming Style</th><th>Amount</th><th>Date Paid</th>
+                            </tr></thead><tbody>`;
+
+                    data.forEach(r => {
+                        html += `<tr>
+                            <td>${r.ownerName}</td><td>${r.petName}</td>
+                            <td>${r.groomingStyle}</td>
+                            <td class="revenue-amount">₱${Number(r.amountDue).toLocaleString()}</td>
+                            <td>${r.paidAt}</td>
+                        </tr>`;
+                    });
+
+                    const total = data.reduce((sum, r) => sum + r.amountDue, 0);
+                    html += `</tbody><tfoot>
+                        <tr class="detail-total-row">
+                            <td colspan="3"><strong>Total</strong></td>
+                            <td class="revenue-amount"><strong>₱${total.toLocaleString()}</strong></td>
+                            <td></td>
+                        </tr></tfoot></table>`;
+
+                    document.getElementById('detailModalBody').innerHTML = html;
+                })
+                .catch(renderError);
+        }
+
+        // ── Grooming Style Detail ─────────────────────────────────────
+        function openGroomingDetail(row) {
+            const style = row.dataset.style;
+            const label = row.dataset.label;
+            const from  = row.dataset.from || '';
+            const to    = row.dataset.to   || '';
+
+            openDetailModal('✂️ ' + label + ' — Paid Reservations');
+
+            let url = `/Reports/GroomingStyleDetail?style=${encodeURIComponent(style)}`;
+            if (from) url += `&from=${from}`;
+            if (to)   url += `&to=${to}`;
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.length) { renderEmpty(); return; }
+
+                    let html = `
+                        <table class="report-table detail-table">
+                            <thead><tr>
+                                <th>Owner</th><th>Pet</th>
+                                <th>Reservation Date</th><th>Amount</th><th>Date Paid</th>
+                            </tr></thead><tbody>`;
+
+                    data.forEach(r => {
+                        html += `<tr>
+                            <td>${r.ownerName}</td><td>${r.petName}</td>
+                            <td>${r.reservationDate}</td>
+                            <td class="revenue-amount">₱${Number(r.amountDue).toLocaleString()}</td>
+                            <td>${r.paidAt}</td>
+                        </tr>`;
+                    });
+
+                    html += `</tbody></table>`;
+                    document.getElementById('detailModalBody').innerHTML = html;
+                })
+                .catch(renderError);
+        }
+
+        // ── Monthly Summary Detail ────────────────────────────────────
+        function openMonthlyDetail(row) {
+            const year  = row.dataset.year;
+            const month = row.dataset.month;
+            const label = row.dataset.label;
+
+            openDetailModal('📅 ' + label + ' — All Reservations');
+
+            fetch(`/Reports/MonthlySummaryDetail?year=${year}&month=${month}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.length) { renderEmpty(); return; }
+
+                    let html = `
+                        <table class="report-table detail-table">
+                            <thead><tr>
+                                <th>Owner</th><th>Pet</th><th>Grooming Style</th>
+                                <th>Date</th><th>Status</th><th>Revenue</th>
+                            </tr></thead><tbody>`;
+
+                    data.forEach(r => {
+                        const statusClass = r.status === 'Approved' ? 'completed'
+                                          : r.status === 'Pending'  ? 'pending'
+                                          : r.status === 'Paid'     ? 'completed'
+                                          : 'cancelled';
+
+                        html += `<tr>
+                            <td>${r.ownerName}</td><td>${r.petName}</td>
+                            <td>${r.groomingStyle}</td><td>${r.reservationDate}</td>
+                            <td><span class="status-badge ${statusClass}">${r.status}</span></td>
+                            <td class="revenue-amount">${r.revenue > 0 ? '₱' + Number(r.revenue).toLocaleString() : '—'}</td>
+                        </tr>`;
+                    });
+
+                    const total = data.reduce((sum, r) => sum + r.revenue, 0);
+                    html += `</tbody><tfoot>
+                        <tr class="detail-total-row">
+                            <td colspan="5"><strong>Total Revenue</strong></td>
+                            <td class="revenue-amount"><strong>${total > 0 ? '₱' + total.toLocaleString() : '—'}</strong></td>
+                        </tr></tfoot></table>`;
+
+                    document.getElementById('detailModalBody').innerHTML = html;
+                })
+                .catch(renderError);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeDetailModal();
+        });
+    </script>
+}

@@ -1,8 +1,6 @@
 ﻿/*
  * CustomerMyBookingsViewModel.cs
  * ViewModel for the Customer Portal My Bookings page.
- * Created in Thread 4.2.
- * Updated in Thread 4.2c: Simplified — only fields needed for display.
  */
 
 namespace LuxeGroom.Models

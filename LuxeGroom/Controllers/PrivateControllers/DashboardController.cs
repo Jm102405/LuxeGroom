@@ -1,9 +1,6 @@
 ﻿/*
  * DashboardController.cs
  * Handles the admin/staff Dashboard view for LuxeGroom.
- * Fixed in Thread 3.2: Added ViewBag.Role so _Layout.cshtml renders
- *   Admin-only nav items (Users, Reports) correctly on Dashboard load.
- * Updated in Thread 4.3.2: Revenue now pulled from Payments table
  *   (sum of AmountDue where Status = "Paid" for current month).
  */
 

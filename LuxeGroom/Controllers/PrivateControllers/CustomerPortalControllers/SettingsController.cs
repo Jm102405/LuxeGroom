@@ -1,8 +1,6 @@
 ﻿/*
  * SettingsController.cs
  * Handles the Customer Portal Settings page for LuxeGroom.
- * Extracted in Thread 3.9 from CustomerPortalController.cs.
- * Updated in Thread 4.3: View Only — loads customer profile from Customers table.
  * GET: /Settings — shows account info (read-only)
  */
 

@@ -1,7 +1,6 @@
 ﻿/*
  * Customer.cs
  * EF Core entity for the Customers table in LuxeGroom.
- * Updated in Thread 3.7: Removed Lastname/Address (not in DB), fixed column mappings.
  */
 
 using System.ComponentModel.DataAnnotations;

@@ -2,10 +2,6 @@
  * ReservationController.cs
  * Handles the public reservation form submission from the landing page.
  * Saves new reservation with Status = "Pending".
- * Updated in Thread 3.7: Added PetSize to reservation entity.
- * Updated in Thread 4.2: Block duplicate emails from Reservations and Users tables.
- * Updated in Thread 4.3.1: Server-side validation for PH phone format and date range (1–2 days).
- * Updated in Thread 4.3.2: Date validation now uses PH local time (UTC+8) to avoid timezone offset.
  */
 
 using LuxeGroom.Data;

@@ -3,11 +3,8 @@
  * Shared layout for all private (authenticated) pages in LuxeGroom.
  * Includes the sidebar navigation, logo, role-based menu visibility,
  * logout confirmation, and the main content render area.
- * Updated in Thread 3.2: Merged Report links into a single collapsible Reports dropdown.
- * Updated in Thread 3.2: Moved Reports dropdown CSS to dashboard.css.
- * Updated in Thread 4.3: Replaced browser confirm with custom luxury logout modal.
- * Updated in Thread 4.3.2: Removed Reservation, Customer, Payment report links.
  *   Reports dropdown now contains: Revenue, Grooming Style, Monthly Summary only.
+ * Updated in Thread 4.4: Added @RenderSection("Scripts") for page-level JS injection.
  *@
 
 <!DOCTYPE html>
@@ -163,5 +160,9 @@
             dropdown.classList.toggle('open');
         }
     </script>
+
+    @* ── Page-level scripts injected here (e.g. Reports, etc.) ── *@
+    @RenderSection("Scripts", required: false)
+
 </body>
 </html>

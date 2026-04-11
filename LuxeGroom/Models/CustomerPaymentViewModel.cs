@@ -1,7 +1,6 @@
 ﻿/*
  * CustomerPaymentViewModel.cs
  * ViewModel for CustomerPortal Payment page.
- * Created in Thread 3.7.
  */
 
 namespace LuxeGroom.Models

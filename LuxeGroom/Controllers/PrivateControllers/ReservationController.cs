@@ -1,14 +1,6 @@
 ﻿/*
  * ReservationController.cs
  * Handles Admin Reservation Management for LuxeGroom.
- * Updated in Thread 2.7: password hashing, ManagedBy, Gmail uniqueness check,
- * customer welcome email, and staying on Reservations page after Accept.
- * Updated in Thread 2.8: Creates User account (CUST-X) when accepting.
- * Updated in Thread 3.7: HandleAccept accepts edited fields from modal + computes
- * 50% down payment + auto-creates Payment record (status: Unpaid).
- * Updated in Thread 4.0: Removed Gmail uniqueness check on HandleAccept.
- *                         HandleAccept now checks if customer already has an account —
- *                         if yes, skips account creation and creates Payment record only.
  */
 
 using LuxeGroom.Data;
@@ -101,7 +93,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
             reservation.ReservationDate = reservationDate;
             reservation.Status = "Approved";
 
-            // 5) Auto-create Payment record
+            // 5) Auto-create Payment record — ID is auto-incremented by EF Core
             var payment = new Payment
             {
                 ReservationId = reservation.Id,
@@ -194,7 +186,11 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 _context.Users.Add(user);
                 _context.SaveChanges();
 
-                // 12) Send welcome email
+                // 12) Link reservation to new customer
+                reservation.CustomerId = newCustomerId;
+                _context.SaveChanges();
+
+                // 13) Send welcome email
                 try
                 {
                     SendCustomerWelcomeEmail(

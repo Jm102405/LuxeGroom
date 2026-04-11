@@ -1,7 +1,6 @@
 ﻿/*
  * CustomerListItemViewModel.cs
  * ViewModel for Customers.cshtml list.
- * Updated in Thread 3.7: Added payment info (status, amount, reference, receipt, managed by).
  */
 
 namespace LuxeGroom.Models

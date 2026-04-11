@@ -3,7 +3,6 @@
  * Handles all User Management operations for LuxeGroom.
  * Merged from UsersController.cs and UserFormController.cs.
  * Covers listing, add, edit, deactivate, and activate actions.
- * Updated in Thread 3.7: CheckEmail now returns isCustomer flag for role-based message.
  */
 
 using LuxeGroom.Data;
@@ -352,6 +351,25 @@ Please login and change your password immediately.
                 return Json(new { exists = false, isCustomer = false });
 
             return Json(new { exists = true, isCustomer = user.Role == "Customer" });
+        }
+
+        // ─── OWNER NAME CHECK API FOR RESERVATIONS ────────────────────────────────
+
+        // GET: /User/CheckOwnerName?ownerName=...
+        // Added in Thread 4.3.3: Blocks reservation if OwnerName matches an existing Username.
+        [HttpGet]
+        public IActionResult CheckOwnerName(string ownerName)
+        {
+            if (string.IsNullOrWhiteSpace(ownerName))
+                return Json(new { exists = false });
+
+            var normalized = ownerName.Trim().ToLower();
+
+            bool exists = _context.Users
+                .AsEnumerable()
+                .Any(u => (u.Username ?? string.Empty).Trim().ToLower() == normalized);
+
+            return Json(new { exists });
         }
     }
 }

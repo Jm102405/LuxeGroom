@@ -4,8 +4,7 @@
  * Extracted in Thread 3.9 from CustomerPortalController.cs.
  * Updated in Thread 3.9: Fixed Customer field names to match Customer.cs entity
  *                         (Firstname only, Phone, CustomerId, DateTime).
- * GET:  /Reserve        — shows reservation form
- * POST: /Reserve/Submit — submits new reservation
+ * Updated in Thread 4.3.3: Removed active reservation restriction — customers can reserve freely.
  */
 
 using LuxeGroom.Data;
@@ -75,9 +74,23 @@ namespace LuxeGroom.Controllers.PrivateControllers.CustomerPortalControllers
                 return RedirectToAction("Index");
             }
 
+            // Fix: extract max numeric ID to avoid duplicate key on gaps/deletions
+            var lastId = _context.Reservations
+                .AsEnumerable()
+                .Select(r =>
+                {
+                    var parts = r.Id.Split('-');
+                    return parts.Length == 2 && int.TryParse(parts[1], out int n) ? n : 0;
+                })
+                .DefaultIfEmpty(0)
+                .Max();
+
+            string newId = $"RES-{lastId + 1}";
+
             // Build reservation using Customer entity fields
             var reservation = new Reservation
             {
+                Id = newId,
                 OwnerName = customer.Firstname,
                 PetName = petName,
                 PetSize = petSize,

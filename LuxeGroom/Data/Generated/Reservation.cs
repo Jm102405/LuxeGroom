@@ -1,9 +1,6 @@
 ﻿/*
  * Reservation.cs
  * EF entity for the Reservations table.
- * Updated in Thread 3: Added TypeName = "date" to ReservationDate to match SSMS column type.
- * Updated in Thread 3.6: Added Customer navigation property.
- * Updated in Thread 3.7: Added PetSize column.
  */
 
 using System.ComponentModel.DataAnnotations;

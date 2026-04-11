@@ -1,317 +1,598 @@
 ﻿/*
  * reports.css
- * Styles for the Reports page in LuxeGroom.
- * Covers tab navigation, stat cards, tables, progress bars,
- * print button, empty states, and print media styles.
- * Created in Thread 4.3.2.
- * Updated in Thread 4.3.2: Added print button + @media print styles.
- * Used by Views/Reports/Reports.cshtml.
+ * Styles for the LuxeGroom Reports page.
+ * Updated in Thread 4.3.2: Built from scratch.
+ * Updated in Thread 4.4 Step 2: Added drill-down modal styles.
+ * Updated in Thread 4.4 Step 3: Added date range filter styles.
+ * Updated in Thread 4.4 Step 3 Fix: Rewritten to match dark luxury theme
+ *   consistent with user.css — dark backgrounds, gold accents, muted text.
+ * Located at: wwwroot/css/private/reports.css
  */
 
+/* ── Design Tokens ───────────────────────────────────────────────── */
+:root {
+    --rpt-bg: #111827;
+    --rpt-surface: #1a1f2e;
+    --rpt-surface-2: #0f1623;
+    --rpt-border: #2d3748;
+    --rpt-border-light: #374151;
+    --rpt-text: #e5e7eb;
+    --rpt-text-muted: #9ca3af;
+    --rpt-text-faint: #4b5563;
+    --rpt-gold: #b8860b;
+    --rpt-gold-light: #d4a017;
+    --rpt-gold-glow: rgba(184, 134, 11, 0.18);
+    --rpt-gold-subtle: rgba(184, 134, 11, 0.08);
+    --rpt-green: #4ade80;
+    --rpt-green-bg: rgba(34, 197, 94, 0.1);
+    --rpt-radius: 10px;
+    --rpt-radius-lg: 14px;
+}
 
-/* ── Page Header Row ── */
+/* ── Header Row ─────────────────────────────────────────────────── */
 .report-header-row {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
-/* ── Print Button ── */
+/* ── Print Button ───────────────────────────────────────────────── */
 .print-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: #1a1f2e;
-    border: 1px solid #2d3748;
-    border-radius: 8px;
-    color: #e5e7eb;
-    font-size: 14px;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem;
+    background: transparent;
+    border: 1px solid var(--rpt-border-light);
+    border-radius: var(--rpt-radius);
+    font-size: 0.875rem;
     font-weight: 600;
+    color: var(--rpt-text-muted);
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
     white-space: nowrap;
     font-family: inherit;
 }
 
     .print-btn:hover {
-        background: #252d3d;
-        border-color: #3b82f6;
-        color: #fff;
+        background: var(--rpt-surface);
+        color: var(--rpt-text);
+        border-color: var(--rpt-gold);
     }
 
-
-/* ── Tab Navigation ── */
+/* ── Tabs ────────────────────────────────────────────────────────── */
 .report-tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #2d3748;
-    padding-bottom: 0;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--rpt-border);
+    flex-wrap: wrap;
 }
 
 .report-tab {
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #6b7280;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--rpt-radius) var(--rpt-radius) 0 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--rpt-text-muted);
     text-decoration: none;
-    border-bottom: 2px solid transparent;
-    transition: color 0.2s ease, border-color 0.2s ease;
-    margin-bottom: -1px;
-    white-space: nowrap;
+    border: 1px solid transparent;
+    border-bottom: none;
+    transition: background 0.2s, color 0.2s;
 }
 
     .report-tab:hover {
-        color: #e5e7eb;
+        background: var(--rpt-surface);
+        color: var(--rpt-text);
     }
 
     .report-tab.active {
-        color: #3b82f6;
-        border-bottom: 2px solid #3b82f6;
+        background: var(--rpt-surface);
+        color: var(--rpt-gold-light);
+        border-color: var(--rpt-border);
+        border-bottom-color: var(--rpt-surface);
+        margin-bottom: -1px;
     }
 
-
-/* ── Report Body ── */
+/* ── Body ────────────────────────────────────────────────────────── */
 .report-body {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 1.25rem;
 }
 
+/* ── Filter Bar ──────────────────────────────────────────────────── */
+.filter-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    background: var(--rpt-surface);
+    border: 1px solid var(--rpt-border);
+    border-radius: var(--rpt-radius-lg);
+    padding: 0.9rem 1.2rem;
+}
 
-/* ── Stat Cards Row ── */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.filter-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--rpt-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.filter-input {
+    padding: 0.48rem 0.85rem;
+    background: var(--rpt-bg);
+    border: 1px solid var(--rpt-border-light);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: var(--rpt-text);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-width: 155px;
+    font-family: inherit;
+    color-scheme: dark;
+}
+
+    .filter-input:focus {
+        outline: none;
+        border-color: var(--rpt-gold);
+        box-shadow: 0 0 0 3px var(--rpt-gold-glow);
+    }
+
+.filter-btn {
+    padding: 0.5rem 1.15rem;
+    background: var(--rpt-gold);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+}
+
+    .filter-btn:hover {
+        background: var(--rpt-gold-light);
+        transform: translateY(-1px);
+    }
+
+    .filter-btn:active {
+        transform: translateY(0);
+    }
+
+.filter-clear {
+    padding: 0.5rem 0.9rem;
+    background: transparent;
+    border: 1px solid var(--rpt-border-light);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--rpt-text-muted);
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+    .filter-clear:hover {
+        background: var(--rpt-bg);
+        color: var(--rpt-text);
+        border-color: var(--rpt-gold);
+    }
+
+/* ── Active Filter Label ─────────────────────────────────────────── */
+.filter-active-label {
+    font-size: 0.82rem;
+    color: var(--rpt-gold-light);
+    font-weight: 500;
+    background: var(--rpt-gold-subtle);
+    border: 1px solid rgba(184,134,11,0.25);
+    border-radius: 8px;
+    padding: 0.45rem 0.9rem;
+    margin-top: -0.25rem;
+}
+
+/* ── Stat Cards ──────────────────────────────────────────────────── */
 .report-stat-row {
     display: flex;
-    gap: 16px;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .report-stat-card {
     flex: 1;
-    min-width: 180px;
-    background: #1a1f2e;
-    border: 1px solid #2d3748;
-    border-radius: 12px;
-    padding: 20px 24px;
+    min-width: 160px;
+    background: var(--rpt-surface);
+    border: 1px solid var(--rpt-border);
+    border-radius: var(--rpt-radius-lg);
+    padding: 1.1rem 1.4rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: border-color 0.2s;
 }
 
+    .report-stat-card:hover {
+        border-color: var(--rpt-gold);
+    }
+
 .report-stat-label {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    margin-bottom: 8px;
+    font-size: 0.72rem;
+    color: var(--rpt-text-muted);
+    margin-bottom: 0.4rem;
     text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
 }
 
 .report-stat-value {
-    font-size: 28px;
+    font-size: 1.7rem;
     font-weight: 700;
-    color: #f1f5f9;
-    line-height: 1;
+    color: var(--rpt-text);
+    line-height: 1.2;
 }
 
-
-/* ── Table Card ── */
-.report-table-card {
-    padding: 0;
-    overflow: hidden;
-    border-radius: 12px;
+/* ── Table Card ──────────────────────────────────────────────────── */
+.activity-card.report-table-card {
+    background: var(--rpt-surface);
+    border: 1px solid var(--rpt-border);
+    border-radius: var(--rpt-radius-lg);
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-
-/* ── Table ── */
+/* ── Table ───────────────────────────────────────────────────────── */
 .report-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
-    .report-table thead tr {
-        background: #0f1419;
-        border-bottom: 1px solid #2d3748;
-    }
-
-    .report-table th {
-        padding: 14px 20px;
+    .report-table thead th {
         text-align: left;
-        font-size: 11px;
+        padding: 0.8rem 1.1rem;
+        font-size: 0.72rem;
         font-weight: 700;
+        color: var(--rpt-text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #6b7280;
+        letter-spacing: 0.06em;
+        border-bottom: 1px solid var(--rpt-border);
+        white-space: nowrap;
+        background: var(--rpt-surface-2);
     }
 
-    .report-table td {
-        padding: 14px 20px;
-        color: #d1d5db;
-        border-bottom: 1px solid #1e2533;
+    .report-table tbody td {
+        padding: 0.9rem 1.1rem;
+        border-bottom: 1px solid var(--rpt-border);
+        color: var(--rpt-text);
+        vertical-align: middle;
     }
 
     .report-table tbody tr:last-child td {
         border-bottom: none;
     }
 
-    .report-table tbody tr:hover {
-        background: #1e2533;
+/* ── Clickable Rows ──────────────────────────────────────────────── */
+.report-row-clickable {
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+    .report-row-clickable:hover {
+        background: var(--rpt-gold-subtle);
     }
 
-/* Revenue amount — gold accent */
-.revenue-amount {
-    color: #C5A059 !important;
+.detail-hint {
+    font-size: 0.78rem;
+    color: var(--rpt-gold-light);
     font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.15s;
 }
 
-/* Rank cell — centered medal */
+.report-row-clickable:hover .detail-hint {
+    opacity: 1;
+}
+
+/* ── Revenue Amount ──────────────────────────────────────────────── */
+.revenue-amount {
+    font-weight: 700;
+    color: var(--rpt-green);
+}
+
+/* ── Rank Cell ───────────────────────────────────────────────────── */
 .rank-cell {
-    font-size: 18px;
+    font-size: 1.1rem;
     text-align: center;
-    width: 60px;
 }
 
-
-/* ── Progress Bar ── */
+/* ── Progress Bar ────────────────────────────────────────────────── */
 .progress-bar-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.5rem;
+    min-width: 120px;
 }
 
 .progress-bar-fill {
-    height: 8px;
-    background: #3b82f6;
-    border-radius: 999px;
+    height: 6px;
+    background: var(--rpt-gold);
+    border-radius: 99px;
     min-width: 4px;
     transition: width 0.4s ease;
+    box-shadow: 0 0 6px var(--rpt-gold-glow);
 }
 
 .progress-bar-label {
-    font-size: 12px;
-    color: #9ca3af;
+    font-size: 0.78rem;
+    color: var(--rpt-text-muted);
     white-space: nowrap;
 }
 
-
-/* ── Empty State ── */
-.report-empty {
-    text-align: center;
-    padding: 60px 40px;
-    color: #64748b;
-    font-size: 14px;
-    background: #1a1f2e;
-    border-radius: 12px;
-    border: 1px solid #2d3748;
+/* ── Status Badge ────────────────────────────────────────────────── */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
 }
 
+    .status-badge.completed {
+        background: rgba(34,197,94,0.12);
+        color: #4ade80;
+        border: 1px solid rgba(34,197,94,0.25);
+    }
 
-/* ══════════════════════════════════════════════════════════════
-   PRINT STYLES
-   Hides sidebar, tabs, and print button.
-   Shows only the active report table cleanly on paper.
-   ══════════════════════════════════════════════════════════════ */
+    .status-badge.pending {
+        background: rgba(234,179,8,0.12);
+        color: #facc15;
+        border: 1px solid rgba(234,179,8,0.25);
+    }
+
+    .status-badge.cancelled {
+        background: rgba(239,68,68,0.12);
+        color: #f87171;
+        border: 1px solid rgba(239,68,68,0.25);
+    }
+
+/* ── Empty State ─────────────────────────────────────────────────── */
+.report-empty {
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--rpt-text-faint);
+    font-size: 0.95rem;
+    background: var(--rpt-surface);
+    border: 1px solid var(--rpt-border);
+    border-radius: var(--rpt-radius-lg);
+}
+
+/* ── Detail Modal Overlay ────────────────────────────────────────── */
+.detail-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+    .detail-modal-overlay.active {
+        display: flex;
+    }
+
+/* ── Detail Modal Box ────────────────────────────────────────────── */
+.detail-modal {
+    background: var(--rpt-surface-2);
+    border: 1px solid var(--rpt-border);
+    border-radius: var(--rpt-radius-lg);
+    width: 100%;
+    max-width: 860px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+    overflow: hidden;
+    position: relative;
+}
+
+    /* Gold accent top bar on modal */
+    .detail-modal::before {
+        content: '';
+        display: block;
+        height: 3px;
+        background: linear-gradient(90deg, var(--rpt-gold), var(--rpt-gold-light), var(--rpt-gold));
+        flex-shrink: 0;
+    }
+
+.detail-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--rpt-border);
+    flex-shrink: 0;
+}
+
+.detail-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--rpt-text);
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+.detail-modal-close {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: var(--rpt-text-muted);
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+
+    .detail-modal-close:hover {
+        background: var(--rpt-surface);
+        color: var(--rpt-text);
+    }
+
+.detail-modal-body {
+    padding: 1.2rem 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+    .detail-modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .detail-modal-body::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .detail-modal-body::-webkit-scrollbar-thumb {
+        background: var(--rpt-border);
+        border-radius: 10px;
+    }
+
+        .detail-modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--rpt-border-light);
+        }
+
+.detail-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0.9rem 1.5rem;
+    border-top: 1px solid var(--rpt-border);
+    flex-shrink: 0;
+    background: var(--rpt-surface-2);
+}
+
+/* ── Detail Table ────────────────────────────────────────────────── */
+.detail-table {
+    font-size: 0.85rem;
+}
+
+.detail-total-row td {
+    padding-top: 0.85rem;
+    border-top: 2px solid var(--rpt-border-light) !important;
+    border-bottom: none !important;
+    color: var(--rpt-text);
+}
+
+/* ── Modal States ────────────────────────────────────────────────── */
+.detail-loading,
+.detail-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--rpt-text-faint);
+    font-size: 0.9rem;
+}
+
+/* ── Close Button (footer) ───────────────────────────────────────── */
+.btn-close-modal {
+    padding: 0.5rem 1.1rem;
+    background: transparent;
+    border: 1px solid var(--rpt-border-light);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--rpt-text-muted);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    font-family: inherit;
+}
+
+    .btn-close-modal:hover {
+        background: var(--rpt-surface);
+        color: var(--rpt-text);
+        border-color: var(--rpt-gold);
+    }
+
+/* ── Print Styles ────────────────────────────────────────────────── */
 @media print {
 
-    /* Hide non-essential UI */
     .sidebar,
     .report-tabs,
     .print-btn,
-    .logout-section,
-    .logout-modal-overlay {
+    .filter-bar,
+    .filter-active-label,
+    .detail-hint,
+    .detail-modal-footer,
+    .detail-modal-close,
+    .logout-section {
         display: none !important;
     }
 
-    /* Full width layout — remove sidebar offset */
     .dashboard-container {
         display: block !important;
     }
 
     .main-content {
-        margin: 0 !important;
+        margin-left: 0 !important;
         padding: 0 !important;
         width: 100% !important;
     }
 
-    /* White background for paper */
-    body,
-    .report-body,
-    .activity-card,
-    .report-table-card,
-    .report-stat-card {
-        background: #ffffff !important;
-        color: #000000 !important;
-        box-shadow: none !important;
-        border-color: #cccccc !important;
+    /* Override dark backgrounds for paper */
+    body, .report-body, .activity-card,
+    .report-stat-card, .report-table-card {
+        background: #fff !important;
+        color: #111 !important;
     }
 
-    /* Readable table text */
-    .report-table th,
-    .report-table td {
-        color: #000000 !important;
-        border-bottom: 1px solid #dddddd !important;
+    .report-table thead th,
+    .report-table tbody td {
+        color: #111 !important;
+        border-color: #ddd !important;
     }
 
-    .report-table thead tr {
-        background: #f3f4f6 !important;
-    }
-
-    /* Stat cards */
-    .report-stat-row {
-        display: flex !important;
-        flex-wrap: wrap !important;
-        gap: 12px !important;
-        margin-bottom: 20px !important;
-    }
-
-    .report-stat-label {
-        color: #555555 !important;
-    }
-
-    .report-stat-value {
-        color: #000000 !important;
-    }
-
-    /* Revenue gold → black for print */
     .revenue-amount {
-        color: #000000 !important;
+        color: #1a5c1a !important;
     }
 
-    /* Progress bar on print */
-    .progress-bar-fill {
-        background: #000000 !important;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
+    .detail-modal-overlay.active {
+        position: static;
+        background: none;
+        padding: 0;
+        backdrop-filter: none;
     }
 
-    .progress-bar-label {
-        color: #000000 !important;
+    .detail-modal {
+        box-shadow: none;
+        max-height: none;
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
     }
 
-    /* Page title */
-    .welcome-title {
-        color: #000000 !important;
-        font-size: 22px !important;
-    }
+        .detail-modal::before {
+            display: none;
+        }
 
-    .welcome-subtitle {
-        color: #555555 !important;
-    }
-
-    /* Avoid row splits across pages */
-    .report-table tr {
+    .report-table-card {
         page-break-inside: avoid;
-    }
-
-    /* LuxeGroom print label above title */
-    .dashboard-header::before {
-        content: "LuxeGroom — Admin Report";
-        display: block;
-        font-size: 11px;
-        color: #888888;
-        margin-bottom: 4px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
     }
 }

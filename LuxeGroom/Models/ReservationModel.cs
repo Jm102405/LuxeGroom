@@ -1,7 +1,6 @@
 ﻿/*
  * ReservationViewModel.cs
  * Binds the public reservation form submission.
- * Updated in Thread 3.7: Added PetSize.
  */
 
 namespace LuxeGroom.Models

@@ -1,12 +1,6 @@
 ﻿/*
  * CustomerPortalController.cs
  * Handles all Customer Portal pages for LuxeGroom.
- * Updated in Thread 3.7: Payment action now loads unpaid/pending payment data.
- *                         Added UploadPayment POST action for receipt submission.
- * Updated in Thread 4.0: Added Reserve POST action to save reservation to database.
- * Updated in Thread 4.2d: MyBookings now redirects to MyBookingsController.Index().
- * Updated in Thread 4.2e: Fixed duplicate PRIMARY KEY on Reserve — uses Max ID instead of Count.
- * Updated in Thread 4.2f: Block reserve if customer has existing Pending or Approved reservation.
  */
 
 using LuxeGroom.Data;
@@ -206,17 +200,6 @@ namespace LuxeGroom.Controllers.PrivateControllers
             if (customer == null)
             {
                 TempData["Error"] = "Customer record not found.";
-                return RedirectToAction("Reserve");
-            }
-
-            // Block if customer already has a Pending or Approved reservation
-            bool hasActiveReservation = _context.Reservations
-                .Any(r => r.Email == customer.Email &&
-                          (r.Status == "Pending" || r.Status == "Approved"));
-
-            if (hasActiveReservation)
-            {
-                TempData["Error"] = "You already have an active reservation. Please wait for it to be completed before making a new one.";
                 return RedirectToAction("Reserve");
             }
 

@@ -7,6 +7,7 @@
  * Updated in Thread 4.3.1: Phone number restricted to valid PH format.
  * Updated in Thread 4.3.1: Date restricted to 1–2 days from today only.
  * Updated in Thread 4.3.2: Fixed date timezone offset — now uses local browser date (not UTC).
+ * Updated in Thread 4.3.3: Added checkOwnerNameExists() — blocks name matching a system Username.
  *@
 
 @* ===== SUCCESS OVERLAY ===== *@
@@ -39,7 +40,13 @@
 
             <div class="form-group">
                 <label class="form-label">OWNER'S NAME</label>
-                <input type="text" name="OwnerName" class="form-input" required />
+                <input type="text"
+                       name="OwnerName"
+                       id="reservationOwnerName"
+                       class="form-input"
+                       required
+                       onblur="checkOwnerNameExists()" />
+                <p id="ownerNameError" style="color:#ef4444;font-size:12px;margin-top:4px;display:none;"></p>
             </div>
 
             <div class="form-group">
@@ -250,9 +257,50 @@
         }
     }
 
+    // ===== OWNER NAME VALIDATION =====
+    // Checks if OwnerName matches an existing Username in the Users table
+    async function checkOwnerNameExists() {
+        const input = document.getElementById('reservationOwnerName');
+        const errorLabel = document.getElementById('ownerNameError');
+        const ownerName = (input.value || '').trim();
+
+        if (!ownerName) {
+            errorLabel.style.display = 'none';
+            input.dataset.ownerNameInvalid = 'false';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/User/CheckOwnerName?ownerName=${encodeURIComponent(ownerName)}`);
+            if (!response.ok) {
+                errorLabel.style.display = 'none';
+                input.dataset.ownerNameInvalid = 'false';
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.exists) {
+                errorLabel.textContent = 'This name is already associated with a system account. Please use your full name as it appears on your ID.';
+                errorLabel.style.display = 'block';
+                input.dataset.ownerNameInvalid = 'true';
+            } else {
+                errorLabel.style.display = 'none';
+                input.dataset.ownerNameInvalid = 'false';
+            }
+        } catch {
+            errorLabel.style.display = 'none';
+            input.dataset.ownerNameInvalid = 'false';
+        }
+    }
+
     // ===== FORM SUBMIT =====
     async function handleReservationSubmit(e) {
         e.preventDefault();
+
+        // Block if owner name invalid
+        const ownerNameInput = document.getElementById('reservationOwnerName');
+        if (ownerNameInput && ownerNameInput.dataset.ownerNameInvalid === 'true') return;
 
         // Block if phone invalid
         const phoneInput = document.getElementById('reservationPhone');

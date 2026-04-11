@@ -1,7 +1,6 @@
 ﻿/*
  * CustomersController.cs
  * Lists customers with latest reservation + payment info.
- * Updated in Thread 3.7: Added payment data to view model + ApprovePayment action.
  */
 
 using LuxeGroom.Data;

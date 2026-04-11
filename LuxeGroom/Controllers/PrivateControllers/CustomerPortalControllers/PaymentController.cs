@@ -1,7 +1,6 @@
 ﻿/*
  * PaymentController.cs
  * Handles the Customer Portal Payment page for LuxeGroom.
- * Extracted in Thread 4.0 from CustomerPortalController.cs.
  * GET:  /Payment              — loads unpaid/pending payment data for the logged-in customer
  * POST: /Payment/UploadPayment — customer submits GCash reference number + receipt image
  */
