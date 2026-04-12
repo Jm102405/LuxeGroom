@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\images\leofullgroom.png\**" />
+    <Content Remove="wwwroot\images\leofullgroom.png\**" />
+    <EmbeddedResource Remove="wwwroot\images\leofullgroom.png\**" />
+    <None Remove="wwwroot\images\leofullgroom.png\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0-preview3.25342.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />

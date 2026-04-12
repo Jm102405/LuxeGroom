@@ -1,14 +1,6 @@
 ﻿/*
  * ReportsController.cs
  * Handles all Report views for LuxeGroom admin.
- * Updated in Thread 3.2: Added stub actions for all report types.
- * Updated in Thread 4.3.2: Removed Reservation, Customer, Payment reports.
- *   Kept and implemented: Revenue, GroomingStyle, MonthlySummary.
- * Updated in Thread 4.4: Moved view models to Models/ReportViewModels.cs.
- * Updated in Thread 4.4 Step 2: Added drill-down detail JSON actions.
- * Updated in Thread 4.4 Step 2 Fix: In-memory joins for EF Core compatibility.
- * Updated in Thread 4.4 Fix 2: GroomingStyleReport counts paid reservations only.
- * Updated in Thread 4.4 Step 3: Added date range filter to all 3 report tabs.
  */
 
 using LuxeGroom.Data;

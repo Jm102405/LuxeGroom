@@ -5,6 +5,7 @@
  * Shows the user list by default (ViewBag.ShowForm == false).
  * Shows the add/edit form when ViewBag.ShowForm == true.
  * Connected to UserController.cs.
+ * Updated in Thread 4.5: Role dropdown removed — all created users are Role = User.
  *@
 
 @model LuxeGroom.Models.UserViewModel
@@ -21,7 +22,6 @@
 
     var activeUsers = ViewBag.ActiveUsers as List<LuxeGroom.Data.Generated.User>;
     var inactiveUsers = ViewBag.InactiveUsers as List<LuxeGroom.Data.Generated.User>;
-    var selectedRole = Model?.Role ?? "";
 }
 
 <link rel="stylesheet" href="~/css/private/user.css" />
@@ -32,6 +32,9 @@
    ═══════════════════════════════════════════════════════════════════════════════ *@
 @if (showForm)
 {
+    @* Hidden span — passes current UserID to JS for edit mode duplicate checks *@
+    <span id="currentUserId" data-id="@Model?.UserID" style="display:none;"></span>
+
     <header class="dashboard-header">
         <h1 class="welcome-title">@(isEdit ? "Edit User" : "Add New User")</h1>
         <p class="welcome-subtitle">
@@ -43,21 +46,13 @@
     <div class="activity-section list-section">
         <div class="user-form-container">
 
-            @* Error alert *@
-        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
-            {
-                <div class="error-alert">
-                    <p>⚠️ @ViewBag.ErrorMessage</p>
-                </div>
-            }
-
             <form method="post"
                   asp-action="@(isEdit ? "EditUser" : "AddUser")"
                   asp-controller="User"
-                  onsubmit="return validateEmail()">
+                  onsubmit="return validateForm()">
                 @Html.AntiForgeryToken()
 
-                @if (isEdit)
+            @if (isEdit)
                 {
                     @* Pass UserID back to the controller *@
                     <input type="hidden" name="UserID" value="@Model?.UserID" />
@@ -65,12 +60,15 @@
                     <input type="hidden" name="Status" value="@Model?.Status" />
                 }
 
+                @* Role is always User — never shown to admin *@
+                <input type="hidden" name="Role" value="User" />
+
                 @* Username input *@
                 <div class="form-group">
                     <label class="form-label">Username</label>
                     <div class="input-wrapper">
                         <span class="input-icon">👤</span>
-                        <input type="text" name="Username" class="form-input"
+                        <input type="text" name="Username" id="usernameInput" class="form-input"
                                placeholder="e.g. jsmith_groomer" required
                                value="@Model?.Username" />
                     </div>
@@ -88,44 +86,17 @@
                     <p class="field-hint">Enter a valid email address.</p>
                 </div>
 
-                @* Phone number and role side by side *@
-                <div class="form-row">
-
-                    <div class="form-group">
-                        <label class="form-label">Phone Number</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📞</span>
-                            <input type="tel" name="PhoneNumber" class="form-input"
-                                   placeholder="+63 912 345 6789"
-                                   value="@Model?.PhoneNumber" />
-                        </div>
+                @* Phone number — full width since role dropdown is removed *@
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📞</span>
+                        <input type="tel" name="PhoneNumber" id="phoneInput" class="form-input"
+                               placeholder="09123456789"
+                               maxlength="11"
+                               minlength="11"
+                               value="@Model?.PhoneNumber" />
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label">System Role</label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🛡️</span>
-                            <select name="Role" class="form-input" required>
-                                <option value="">Select a role</option>
-                                @if (selectedRole == "Admin")
-                                {
-                                    <option value="Admin" selected>Admin</option>
-                                    <option value="User">User</option>
-                                }
-                                else if (selectedRole == "User")
-                                {
-                                    <option value="Admin">Admin</option>
-                                    <option value="User" selected>User</option>
-                                }
-                                else
-                                {
-                                    <option value="Admin">Admin</option>
-                                    <option value="User">User</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
                 </div>
 
                 @* Active account toggle and email notice — Add mode only *@
@@ -169,7 +140,59 @@
             input.value = element.classList.contains('active') ? 'Active' : 'Inactive';
         }
 
-        function validateEmail() {
+        // ─── Real-time username duplicate check ───────────────────────────────
+        const usernameInput = document.getElementById('usernameInput');
+        const emailInput    = document.getElementById('emailInput');
+        const currentId     = document.getElementById('currentUserId')?.dataset.id ?? '';
+
+        usernameInput.addEventListener('blur', async function () {
+            const val = this.value.trim();
+            if (!val) return;
+
+            const res  = await fetch(`/User/CheckUsernameExists?username=${encodeURIComponent(val)}&excludeId=${encodeURIComponent(currentId)}`);
+            const data = await res.json();
+
+            if (data.exists) {
+                this.setCustomValidity('Username already exists. Please choose a different one.');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        usernameInput.addEventListener('input', function () {
+            this.setCustomValidity('');
+        });
+
+        // ─── Real-time email duplicate check ──────────────────────────────────
+        emailInput.addEventListener('blur', async function () {
+            const val = this.value.trim();
+            if (!val) return;
+
+            const res  = await fetch(`/User/CheckEmailExists?email=${encodeURIComponent(val)}&excludeId=${encodeURIComponent(currentId)}`);
+            const data = await res.json();
+
+            if (data.exists) {
+                this.setCustomValidity('Email address is already in use. Please use a different one.');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        emailInput.addEventListener('input', function () {
+            this.setCustomValidity('');
+        });
+
+        // ─── Phone length validation on submit ────────────────────────────────
+        function validateForm() {
+            const phone = document.getElementById('phoneInput');
+            if (phone && phone.value.trim().length > 0 && phone.value.trim().length !== 11) {
+                phone.setCustomValidity('Phone number must be exactly 11 digits.');
+                phone.reportValidity();
+                return false;
+            }
+            if (phone) phone.setCustomValidity('');
             return true;
         }
     </script>
@@ -187,24 +210,20 @@ else
 
     <div class="activity-section">
 
-        @* Section header with title and action buttons *@
         <div class="section-header">
 
-            @* Title updates via JS when toggling between Active and Inactive lists *@
             <h2 class="section-title" id="sectionTitle">
                 Active Users (@(activeUsers?.Count ?? 0))
             </h2>
 
             <div class="header-buttons">
 
-                @* Add New User button — routes to UserController.AddUser *@
                 <button class="header-icon-btn add-user-btn" id="addUserBtn"
                         onclick="location.href='/User/AddUser'">
                     <img src="~/images/add-user.png" alt="Add User" />
                     <span>Add New User</span>
                 </button>
 
-                @* Toggle button — switches between Active and Inactive lists *@
                 <button class="header-icon-btn toggle-inactive-btn" onclick="toggleList()">
                     <img src="~/images/inactive.png" alt="Toggle" id="toggleBtnIcon" />
                     <span id="toggleBtnText">Show Inactive</span>
@@ -214,7 +233,6 @@ else
 
         </div>
 
-        @* Search bar — filters visible rows on every keystroke *@
         <div class="search-wrapper">
             <span class="search-icon">🔍</span>
             <input type="text" id="searchInput" class="search-input"
@@ -222,27 +240,23 @@ else
                    oninput="filterUsers()" />
         </div>
 
-        @* Hidden message shown when search returns no matching rows *@
         <div class="no-results" id="noResults" style="display:none;">
             <p>No users found matching your search.</p>
         </div>
 
-        @* Scrollable list area containing both Active and Inactive cards *@
         <div class="list-scroll-wrapper">
 
-            @* Active Users List — visible by default *@
+            @* Active Users List *@
             <div class="activity-card" id="activeList">
                 @if (activeUsers != null && activeUsers.Count > 0)
                 {
                     foreach (var user in activeUsers)
                     {
-                        @* User row — data attributes used for JS search filtering *@
                         <div class="activity-item user-row"
                              data-username="@user.Username.ToLower()"
                              data-email="@user.Gmail.ToLower()"
                              data-role="@user.Role.ToLower()">
 
-                            @* Role icon — crown for Admin, person for User *@
                             <div class="activity-icon">
                                 @if (user.Role == "Admin")
                                 {
@@ -254,24 +268,20 @@ else
                                 }
                             </div>
 
-                            @* User details — username, email, role, and creation date *@
                             <div class="activity-details">
                                 <h4>@user.Username</h4>
                                 <p>@user.Gmail - @user.Role</p>
                                 <small class="date-created">Created: @user.DateCreated.ToString("MMM dd, yyyy")</small>
                             </div>
 
-                            @* Per-row action buttons *@
                             <div class="action-buttons">
 
-                                @* Edit button — routes to UserController.EditUser *@
                                 <button class="icon-btn edit-btn"
                                         onclick="location.href='/User/EditUser?id=@user.UserId'"
                                         title="Edit">
                                     <img src="~/images/edit.png" alt="Edit" />
                                 </button>
 
-                                @* Deactivate button — triggers luxury confirm modal *@
                                 <button class="icon-btn delete-btn"
                                         onclick="confirmDelete('@user.UserId', '@user.Username')"
                                         title="Deactivate">
@@ -290,19 +300,17 @@ else
                 }
             </div>
 
-            @* Inactive Users List — hidden by default, shown when toggled *@
+            @* Inactive Users List *@
             <div class="activity-card" id="inactiveList" style="display:none;">
                 @if (inactiveUsers != null && inactiveUsers.Count > 0)
                 {
                     foreach (var user in inactiveUsers)
                     {
-                        @* User row — data attributes used for JS search filtering *@
                         <div class="activity-item user-row"
                              data-username="@user.Username.ToLower()"
                              data-email="@user.Gmail.ToLower()"
                              data-role="@user.Role.ToLower()">
 
-                            @* Role icon — crown for Admin, person for User *@
                             <div class="activity-icon">
                                 @if (user.Role == "Admin")
                                 {
@@ -314,17 +322,14 @@ else
                                 }
                             </div>
 
-                            @* User details — username, email, role, and creation date *@
                             <div class="activity-details">
                                 <h4>@user.Username</h4>
                                 <p>@user.Gmail - @user.Role</p>
                                 <small class="date-created">Created: @user.DateCreated.ToString("MMM dd, yyyy")</small>
                             </div>
 
-                            @* Per-row action buttons *@
                             <div class="action-buttons">
 
-                                @* Activate button — triggers luxury confirm modal *@
                                 <button class="icon-btn activate-btn"
                                         onclick="confirmActivate('@user.UserId', '@user.Username')"
                                         title="Activate">
@@ -347,32 +352,17 @@ else
     </div>
 
     @* ─── Luxury Confirm Modal ──────────────────────────────────────────────────── *@
-    @* Single reusable modal — content and accent color swapped by JS per action *@
     <div class="lux-modal-overlay" id="luxModal" onclick="handleOverlayClick(event)">
         <div class="lux-modal" id="luxModalBox">
 
-            @* Decorative top accent bar — color set by JS (red or green) *@
             <div class="lux-modal-accent" id="luxModalAccent"></div>
-
-            @* Modal icon — emoji set by JS per action *@
             <div class="lux-modal-icon" id="luxModalIcon"></div>
-
-            @* Modal badge label *@
             <div class="lux-modal-badge" id="luxModalBadge"></div>
-
-            @* Modal title *@
             <h3 class="lux-modal-title" id="luxModalTitle"></h3>
-
-            @* Modal body message *@
             <p class="lux-modal-body" id="luxModalBody"></p>
-
-            @* Username pill highlight *@
             <div class="lux-modal-user" id="luxModalUser"></div>
-
-            @* Divider line *@
             <div class="lux-modal-divider"></div>
 
-            @* Action buttons row *@
             <div class="lux-modal-actions">
                 <button class="lux-modal-btn lux-btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="lux-modal-btn lux-btn-confirm" id="luxModalConfirm"></button>
@@ -382,10 +372,8 @@ else
     </div>
 
     <script>
-        // Track whether the inactive list is currently visible
         let showingInactive = false;
 
-        // Toggle between Active and Inactive user lists
         function toggleList() {
             const activeList   = document.getElementById('activeList');
             const inactiveList = document.getElementById('inactiveList');
@@ -394,7 +382,6 @@ else
             const btnIcon      = document.getElementById('toggleBtnIcon');
             const addUserBtn   = document.getElementById('addUserBtn');
 
-            // Clear search input and reset filter before switching lists
             document.getElementById('searchInput').value = '';
             filterUsers();
 
@@ -417,7 +404,6 @@ else
             }
         }
 
-        // Filter visible rows in the current list based on search query
         function filterUsers() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const currentList = showingInactive
@@ -444,9 +430,6 @@ else
                 visibleCount === 0 && query !== '' ? 'block' : 'none';
         }
 
-        // ─── Luxury Modal Logic ─────────────────────────────────────────────────────
-
-        // Open the modal and configure it for the Deactivate action
         function confirmDelete(userId, username) {
             openModal({
                 icon:         '🚫',
@@ -462,7 +445,6 @@ else
             });
         }
 
-        // Open the modal and configure it for the Activate action
         function confirmActivate(userId, username) {
             openModal({
                 icon:         '✅',
@@ -478,7 +460,6 @@ else
             });
         }
 
-        // Populate and open the modal with the given config
         function openModal(config) {
             document.getElementById('luxModalAccent').style.background = config.accentColor;
             document.getElementById('luxModalIcon').textContent         = config.icon;
@@ -498,19 +479,16 @@ else
             setTimeout(() => overlay.classList.add('visible'), 10);
         }
 
-        // Close the modal with reverse animation
         function closeModal() {
             const overlay = document.getElementById('luxModal');
             overlay.classList.remove('visible');
             setTimeout(() => { overlay.style.display = 'none'; }, 300);
         }
 
-        // Close modal when clicking the dark overlay
         function handleOverlayClick(e) {
             if (e.target === document.getElementById('luxModal')) closeModal();
         }
 
-        // Allow pressing Escape to dismiss the modal
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeModal();
         });

@@ -3,6 +3,9 @@
  * Handles all User Management operations for LuxeGroom.
  * Merged from UsersController.cs and UserFormController.cs.
  * Covers listing, add, edit, deactivate, and activate actions.
+ * Updated in Thread 4.5: Added CheckUsernameExists and CheckEmailExists
+ *                         for real-time client-side duplicate validation.
+ * Updated in Thread 4.5: Role is hardcoded to "User" — Admin cannot be created via this form.
  */
 
 using LuxeGroom.Data;
@@ -78,11 +81,13 @@ namespace LuxeGroom.Controllers.PrivateControllers
             ViewBag.Role = role;
             ViewBag.ShowForm = true;
 
+            // Role is always User — override any submitted value
+            model.Role = "User";
+
             if (string.IsNullOrWhiteSpace(model.Username) ||
-                string.IsNullOrWhiteSpace(model.Gmail) ||
-                string.IsNullOrWhiteSpace(model.Role))
+                string.IsNullOrWhiteSpace(model.Gmail))
             {
-                ViewBag.ErrorMessage = "Username, Email, and Role are required.";
+                ViewBag.ErrorMessage = "Username and Email are required.";
                 return View("/Views/Private/User.cshtml", model);
             }
 
@@ -100,9 +105,8 @@ namespace LuxeGroom.Controllers.PrivateControllers
                     return View("/Views/Private/User.cshtml", model);
                 }
 
-                string prefix = model.Role == "Admin" ? "ADM" : "USR";
                 var existingIds = _context.Users
-                    .Where(u => u.Role == model.Role)
+                    .Where(u => u.Role == "User")
                     .Select(u => u.UserId)
                     .ToList();
 
@@ -115,7 +119,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
                     .DefaultIfEmpty(0)
                     .Max();
 
-                string newUserID = $"{prefix}-{maxNum + 1}";
+                string newUserID = $"USR-{maxNum + 1}";
 
                 string tempPassword = GenerateTemporaryPassword();
                 string passwordHash = BCrypt.Net.BCrypt.HashPassword(tempPassword);
@@ -127,7 +131,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
                     PasswordHash = passwordHash,
                     Gmail = model.Gmail,
                     PhoneNumber = model.PhoneNumber ?? "",
-                    Role = model.Role,
+                    Role = "User",
                     Status = model.Status ?? "Active",
                     DateCreated = DateTime.Now
                 };
@@ -192,11 +196,13 @@ namespace LuxeGroom.Controllers.PrivateControllers
             ViewBag.ShowForm = true;
             ViewBag.IsEdit = true;
 
+            // Role is always User — override any submitted value
+            model.Role = "User";
+
             if (string.IsNullOrWhiteSpace(model.Username) ||
-                string.IsNullOrWhiteSpace(model.Gmail) ||
-                string.IsNullOrWhiteSpace(model.Role))
+                string.IsNullOrWhiteSpace(model.Gmail))
             {
-                ViewBag.ErrorMessage = "Username, Email, and Role are required.";
+                ViewBag.ErrorMessage = "Username and Email are required.";
                 return View("/Views/Private/User.cshtml", model);
             }
 
@@ -220,7 +226,7 @@ namespace LuxeGroom.Controllers.PrivateControllers
                 user.Username = model.Username;
                 user.Gmail = model.Gmail;
                 user.PhoneNumber = model.PhoneNumber ?? "";
-                user.Role = model.Role;
+                user.Role = "User";
 
                 _context.SaveChanges();
 
@@ -334,7 +340,6 @@ Please login and change your password immediately.
         // ─── EMAIL CHECK API FOR RESERVATIONS ─────────────────────────────────────
 
         // GET: /User/CheckEmail?email=...
-        // Updated in Thread 3.7: Returns isCustomer flag for role-based error message.
         [HttpGet]
         public IActionResult CheckEmail(string email)
         {
@@ -356,7 +361,6 @@ Please login and change your password immediately.
         // ─── OWNER NAME CHECK API FOR RESERVATIONS ────────────────────────────────
 
         // GET: /User/CheckOwnerName?ownerName=...
-        // Added in Thread 4.3.3: Blocks reservation if OwnerName matches an existing Username.
         [HttpGet]
         public IActionResult CheckOwnerName(string ownerName)
         {
@@ -368,6 +372,44 @@ Please login and change your password immediately.
             bool exists = _context.Users
                 .AsEnumerable()
                 .Any(u => (u.Username ?? string.Empty).Trim().ToLower() == normalized);
+
+            return Json(new { exists });
+        }
+
+        // ─── USERNAME EXISTS CHECK (real-time form validation) ────────────────────
+
+        // GET: /User/CheckUsernameExists?username=...&excludeId=...
+        [HttpGet]
+        public IActionResult CheckUsernameExists(string username, string excludeId = "")
+        {
+            if (string.IsNullOrWhiteSpace(username))
+                return Json(new { exists = false });
+
+            var normalized = username.Trim().ToLower();
+
+            bool exists = _context.Users
+                .AsEnumerable()
+                .Any(u => (u.Username ?? string.Empty).Trim().ToLower() == normalized
+                          && u.UserId != excludeId);
+
+            return Json(new { exists });
+        }
+
+        // ─── EMAIL EXISTS CHECK (real-time form validation) ───────────────────────
+
+        // GET: /User/CheckEmailExists?email=...&excludeId=...
+        [HttpGet]
+        public IActionResult CheckEmailExists(string email, string excludeId = "")
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return Json(new { exists = false });
+
+            var normalized = email.Trim().ToLower();
+
+            bool exists = _context.Users
+                .AsEnumerable()
+                .Any(u => (u.Gmail ?? string.Empty).Trim().ToLower() == normalized
+                          && u.UserId != excludeId);
 
             return Json(new { exists });
         }

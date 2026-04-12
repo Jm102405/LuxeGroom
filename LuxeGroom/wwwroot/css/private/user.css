@@ -7,6 +7,9 @@
  * Updated in Thread 4.3.2: Fixed Add User form UI — icons, spacing, placeholder, gaps.
  * Updated in Thread 4.3.2: Fixed double scrollbar — split form-section and list-section scroll context.
  * Updated in Thread 4.3.2: Form now fits within viewport — internal scroll, tighter padding.
+ * Updated in Thread 4.5: Fixed list-section overflow: hidden → overflow-y: auto.
+ * Updated in Thread 4.5: Removed fixed height on list-section — form now fits fully on screen
+ *                         without requiring scroll when error alert is visible.
  * Used by Views/Private/User.cshtml.
  */
 
@@ -291,7 +294,7 @@ select.form-input {
         transform: translateY(0);
     }
 
-/* Base activity section */
+/* Base activity section — natural height, no clipping */
 .activity-section {
     display: flex;
     flex-direction: column;
@@ -299,35 +302,16 @@ select.form-input {
     overflow: visible;
 }
 
-    /* Form section — scrollable internally so buttons are always reachable */
+    /* Form section — natural height, no fixed constraint, no internal scroll */
     .activity-section.form-section {
-        height: calc(100vh - 180px);
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-right: 4px;
+        height: auto;
+        overflow: visible;
     }
 
-        .activity-section.form-section::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .activity-section.form-section::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .activity-section.form-section::-webkit-scrollbar-thumb {
-            background: #2d3748;
-            border-radius: 10px;
-        }
-
-            .activity-section.form-section::-webkit-scrollbar-thumb:hover {
-                background: #4b5563;
-            }
-
-    /* List section — fixed height with internal scroll */
+    /* List section — natural height, no fixed constraint, no clipping */
     .activity-section.list-section {
-        height: calc(100vh - 180px);
-        overflow: hidden;
+        height: auto;
+        overflow: visible;
     }
 
 /* Responsive */

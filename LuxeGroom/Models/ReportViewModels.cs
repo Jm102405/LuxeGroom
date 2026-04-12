@@ -1,7 +1,6 @@
 ﻿/*
  * ReportViewModels.cs
  * View models for the LuxeGroom Reports feature.
- * Separated from ReportsController in Thread 4.4.
  * Located at: Models/ReportViewModels.cs
  */
 
